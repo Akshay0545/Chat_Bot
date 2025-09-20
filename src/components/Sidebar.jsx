@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Plus, MessageSquare, ChevronLeft } from 'lucide-react';
+import { Plus, MessageSquare, ChevronLeft, ChevronRight, MoreVertical, Trash2, Edit3 } from 'lucide-react';
 import { 
   setActiveConversation, 
-  createConversation, 
+  setMessages,
   fetchConversations,
-  fetchMessages
+  fetchMessages,
+  deleteConversation,
+  updateConversation
 } from '../store/chatSlice';
 import { toggleSidebar } from '../store/uiSlice';
 
@@ -13,30 +15,52 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const { conversations, activeConversation, loading } = useSelector((state) => state.chat);
   const { sidebarCollapsed } = useSelector((state) => state.ui);
+  
+  const [hoveredConversation, setHoveredConversation] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(null);
+  const [showRenameDialog, setShowRenameDialog] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
+  const [conversationToRename, setConversationToRename] = useState(null);
 
   // Fetch conversations on component mount
   useEffect(() => {
     dispatch(fetchConversations());
   }, [dispatch]);
 
-  const handleNewChat = async () => {
-    try {
-      const newConversation = await dispatch(createConversation('New Chat')).unwrap();
-      dispatch(setActiveConversation(newConversation.id));
-      
-      // Close sidebar on mobile after creating new chat
-      if (window.innerWidth < 1024) {
-        dispatch(toggleSidebar());
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuOpen && !event.target.closest('.context-menu-container')) {
+        setMenuOpen(null);
       }
-    } catch (error) {
-      console.error('Failed to create conversation:', error);
+      if (showRenameDialog && !event.target.closest('.rename-dialog-container')) {
+        setShowRenameDialog(false);
+        setRenameValue('');
+        setConversationToRename(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen, showRenameDialog]);
+
+  const handleNewChat = () => {
+    // Clear active conversation so that when user sends first message,
+    // it will create a new conversation with the user's prompt as title
+    dispatch(setActiveConversation(null));
+    
+    // Close sidebar on mobile after starting new chat
+    if (window.innerWidth < 1024) {
+      dispatch(toggleSidebar());
     }
   };
 
   const handleConversationClick = async (conversationId) => {
     dispatch(setActiveConversation(conversationId));
     
-    // Fetch messages for the selected conversation
+    // Fetch messages for the selected conversation from API
     try {
       await dispatch(fetchMessages({ conversationId })).unwrap();
     } catch (error) {
@@ -72,21 +96,74 @@ const Sidebar = () => {
     }
   };
 
+  const handleDeleteConversation = async (conversationId) => {
+    if (window.confirm('Are you sure you want to delete this conversation?')) {
+      try {
+        await dispatch(deleteConversation(conversationId)).unwrap();
+        if (activeConversation === conversationId) {
+          dispatch(setActiveConversation(null));
+        }
+      } catch (error) {
+        console.error('Failed to delete conversation:', error);
+      }
+    }
+    setMenuOpen(null);
+  };
+
+  const handleRenameConversation = (conversation) => {
+    setConversationToRename(conversation);
+    setRenameValue(conversation.title);
+    setShowRenameDialog(true);
+    setMenuOpen(null);
+  };
+
+  const handleRenameSubmit = async () => {
+    if (renameValue.trim() && conversationToRename) {
+      try {
+        console.log('Attempting to rename conversation:', conversationToRename.id, 'to:', renameValue.trim());
+        
+        await dispatch(updateConversation({
+          id: conversationToRename.id,
+          title: renameValue.trim()
+        })).unwrap();
+        
+        console.log('Conversation renamed successfully');
+      } catch (error) {
+        console.error('Failed to rename conversation:', error);
+        alert('Failed to rename conversation. Please try again.');
+      }
+    }
+    setShowRenameDialog(false);
+    setRenameValue('');
+    setConversationToRename(null);
+  };
+
+  const handleMenuClick = (e, conversationId) => {
+    e.stopPropagation();
+    setMenuOpen(menuOpen === conversationId ? null : conversationId);
+  };
+
   return (
-    <div className="h-full bg-white flex flex-col w-full">
+    <div className="h-full bg-white flex flex-col w-full min-h-0">
       <div className={`${sidebarCollapsed ? 'p-3' : 'p-4 lg:p-6'} border-b border-gray-200`}>
         <div className={`flex items-center ${sidebarCollapsed ? 'justify-center mb-4' : 'justify-between mb-6'}`}>
           {!sidebarCollapsed && <h2 className="text-lg font-bold text-gray-900">Conversations</h2>}
-          {sidebarCollapsed && (
-            <button
-              onClick={() => dispatch(toggleSidebar())}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
-            >
-              <ChevronLeft size={20} />
-            </button>
-          )}
+          <button
+            onClick={() => dispatch(toggleSidebar())}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+          >
+            {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          </button>
         </div>
-        {!sidebarCollapsed && (
+        {sidebarCollapsed ? (
+          <button
+            onClick={handleNewChat}
+            className="w-full bg-blue-600 text-white p-3 rounded-xl font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
+            title="New Chat"
+          >
+            <Plus size={20} />
+          </button>
+        ) : (
           <button
             onClick={handleNewChat}
             className="w-full bg-blue-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
@@ -108,40 +185,131 @@ const Sidebar = () => {
         ) : (
           <div className="p-3 space-y-2">
             {conversations.map((conversation) => (
-              <button
+              <div
                 key={conversation.id}
-                onClick={() => handleConversationClick(conversation.id)}
-                className={`w-full text-left rounded-xl transition-all duration-200 ${
+                className={`relative group rounded-xl transition-all duration-200 ${
                   activeConversation === conversation.id
                     ? 'bg-blue-50 border-2 border-blue-200 shadow-sm'
                     : 'hover:bg-gray-50 border-2 border-transparent'
-                } ${sidebarCollapsed ? 'p-3 flex justify-center' : 'p-4'}`}
-                title={sidebarCollapsed ? conversation.title : ''}
+                }`}
+                onMouseEnter={() => setHoveredConversation(conversation.id)}
+                onMouseLeave={() => setHoveredConversation(null)}
               >
-                {sidebarCollapsed ? (
-                  <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <MessageSquare size={16} className="text-gray-600" />
-                  </div>
-                ) : (
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 text-sm truncate mb-1">
-                        {conversation.title}
-                      </h3>
-                      <p className="text-gray-500 text-xs truncate">
-                        {conversation.preview}
-                      </p>
+                <button
+                  onClick={() => handleConversationClick(conversation.id)}
+                  className={`w-full text-left transition-all duration-200 ${
+                    sidebarCollapsed ? 'p-3 flex justify-center' : 'p-4'
+                  }`}
+                  title={sidebarCollapsed ? conversation.title : ''}
+                >
+                  {sidebarCollapsed ? (
+                    <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <MessageSquare size={16} className="text-gray-600" />
                     </div>
-                    <span className="text-xs text-gray-400 ml-3 flex-shrink-0 mt-0.5">
-                      {formatTime(conversation.timestamp)}
-                    </span>
-                  </div>
+                  ) : (
+                    <div className="flex items-start justify-between w-full">
+                      <div className="flex-1 min-w-0 pr-12">
+                        <h3 className="font-semibold text-gray-900 text-sm truncate mb-1">
+                          {conversation.title}
+                        </h3>
+                        <p className="text-gray-500 text-xs truncate">
+                          {conversation.preview}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2 flex-shrink-0 pr-8">
+                        <span className="text-xs text-gray-400 mt-0.5">
+                          {formatTime(conversation.timestamp)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </button>
+                
+                {/* 3-dot menu - only show on hover and when not collapsed */}
+                {!sidebarCollapsed && hoveredConversation === conversation.id && (
+                  <button
+                    onClick={(e) => handleMenuClick(e, conversation.id)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-all duration-200"
+                  >
+                    <MoreVertical size={16} />
+                  </button>
                 )}
-              </button>
+                
+                {/* Context Menu */}
+                {menuOpen === conversation.id && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setMenuOpen(null)}
+                    />
+                    <div className="context-menu-container absolute right-2 top-8 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
+                      <button
+                        onClick={() => handleRenameConversation(conversation)}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                      >
+                        <Edit3 size={16} className="text-gray-500" />
+                        <span>Rename</span>
+                      </button>
+                      <div className="border-t border-gray-100 my-1"></div>
+                      <button
+                        onClick={() => handleDeleteConversation(conversation.id)}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3"
+                      >
+                        <Trash2 size={16} className="text-red-500" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             ))}
           </div>
         )}
       </div>
+      
+      {/* Rename Dialog */}
+      {showRenameDialog && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-50" 
+            onClick={() => setShowRenameDialog(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="rename-dialog-container bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Rename Conversation</h3>
+                <input
+                  type="text"
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  placeholder="Enter new name"
+                  autoFocus
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleRenameSubmit();
+                    }
+                  }}
+                />
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setShowRenameDialog(false)}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRenameSubmit}
+                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                  >
+                    Rename
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

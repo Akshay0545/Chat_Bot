@@ -1,13 +1,13 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Bell, ChevronDown, User, Menu, X } from 'lucide-react';
-import { toggleNotificationPanel, toggleSidebar, markAllNotificationsRead } from '../store/uiSlice';
+import { Bell, ChevronDown, User } from 'lucide-react';
+import { toggleNotificationPanel, markAllNotificationsRead } from '../store/uiSlice';
 import { logout } from '../store/authSlice';
 
 const Header = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { notificationPanelOpen, notifications, sidebarCollapsed } = useSelector((state) => state.ui);
+  const { notificationPanelOpen, notifications } = useSelector((state) => state.ui);
   
   const [userDropdownOpen, setUserDropdownOpen] = React.useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -21,24 +21,18 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between relative z-10">
+    <header className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between relative z-10">
       <div className="flex items-center space-x-4">
-        <button
-          onClick={() => dispatch(toggleSidebar())}
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
-        >
-          {sidebarCollapsed ? <Menu size={20} /> : <X size={20} />}
-        </button>
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">AI Chat</h1>
+        <h1 className="font-bold text-gray-900" style={{ fontSize: '20px' }}>AI Chat</h1>
       </div>
 
-      <div className="flex items-center space-x-3 lg:space-x-6">
+      <div className="flex items-center space-x-4">
         {/* Credits */}
         <div className="flex items-center space-x-2 text-blue-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
           </svg>
-          <span className="font-semibold text-sm">
+          <span className="font-semibold" style={{ fontSize: '14px' }}>
             {user?.credits !== undefined && user?.credits !== null ? user.credits.toLocaleString() : '1,250'}
           </span>
         </div>
@@ -70,7 +64,7 @@ const Header = () => {
               />
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-20">
                 <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                  <h3 className="font-semibold text-gray-900" style={{ fontSize: '14px' }}>Notifications</h3>
                   {unreadCount > 0 && (
                     <button
                       onClick={handleMarkAllRead}
@@ -114,14 +108,14 @@ const Header = () => {
             className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
           >
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <User size={16} className="text-white" />
+              <User size={20} className="text-white" />
             </div>
             <div className="hidden sm:block text-left">
               <p className="text-sm font-semibold text-gray-900 truncate max-w-32">
-                {user?.email || 'akshaykashyap7879@gmail.com'}
+                {user?.username || user?.email || 'akshaykashyap7879@gmail.com'}
               </p>
             </div>
-            <ChevronDown size={16} className="text-gray-400" />
+            <ChevronDown size={20} className="text-gray-400" />
           </button>
 
           {userDropdownOpen && (
@@ -133,7 +127,7 @@ const Header = () => {
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-20">
                 <div className="px-4 py-3 border-b border-gray-100">
                   <p className="text-sm font-semibold text-gray-900 truncate">
-                    {user?.email || 'akshaykashyap7879@gmail.com'}
+                    {user?.username || user?.email || 'akshaykashyap7879@gmail.com'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">Free Plan</p>
                 </div>

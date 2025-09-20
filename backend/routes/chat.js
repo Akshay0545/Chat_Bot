@@ -223,6 +223,52 @@ router.post('/conversations/:conversationId/messages', validateMessage, async (r
   }
 });
 
+// Update conversation
+router.put('/conversations/:conversationId', async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { title } = req.body;
+
+    if (!title || title.trim().length === 0) {
+      return res.status(400).json({
+        message: 'Title is required',
+        code: 'INVALID_TITLE'
+      });
+    }
+
+    const conversation = await Conversation.findOneAndUpdate(
+      { _id: conversationId, userId: req.user._id, isActive: true },
+      { title: title.trim(), updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!conversation) {
+      return res.status(404).json({
+        message: 'Conversation not found',
+        code: 'CONVERSATION_NOT_FOUND'
+      });
+    }
+
+    res.json({
+      message: 'Conversation updated successfully',
+      conversation: {
+        id: conversation._id,
+        title: conversation.title,
+        createdAt: conversation.createdAt,
+        updatedAt: conversation.updatedAt,
+        messageCount: conversation.metadata.messageCount
+      }
+    });
+
+  } catch (error) {
+    console.error('Update conversation error:', error);
+    res.status(500).json({
+      message: 'Failed to update conversation',
+      code: 'UPDATE_CONVERSATION_ERROR'
+    });
+  }
+});
+
 // Delete conversation
 router.delete('/conversations/:conversationId', async (req, res) => {
   try {

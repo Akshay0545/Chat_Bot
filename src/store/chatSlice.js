@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import apiService from '../services/api';
 
+
+// Initial state - data will be loaded from API
 const initialState = {
   conversations: [],
   activeConversation: null,
@@ -75,6 +77,18 @@ export const deleteConversation = createAsyncThunk(
   }
 );
 
+export const updateConversation = createAsyncThunk(
+  'chat/updateConversation',
+  async ({ id, title }, { rejectWithValue }) => {
+    try {
+      const response = await apiService.updateConversation(id, title);
+      return response.conversation;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const chatSlice = createSlice({
   name: 'chat',
   initialState,
@@ -99,6 +113,12 @@ const chatSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    // Clear all chat data
+    clearAllChatData: (state) => {
+      state.conversations = [];
+      state.activeConversation = null;
+      state.messages = [];
     },
   },
   extraReducers: (builder) => {
@@ -170,6 +190,20 @@ const chatSlice = createSlice({
           state.activeConversation = null;
           state.messages = [];
         }
+      })
+      // Update conversation
+      .addCase(updateConversation.fulfilled, (state, action) => {
+        console.log('updateConversation.fulfilled:', action.payload);
+        const index = state.conversations.findIndex(
+          conv => conv.id === action.payload.id
+        );
+        if (index !== -1) {
+          // Update the conversation with the returned data
+          state.conversations[index] = { ...state.conversations[index], ...action.payload };
+          console.log('Updated conversation in state:', state.conversations[index]);
+        } else {
+          console.log('Conversation not found in state for ID:', action.payload.id);
+        }
       });
   },
 });
@@ -181,6 +215,7 @@ export const {
   addMessage, 
   addConversation, 
   setTyping,
-  clearError
+  clearError,
+  clearAllChatData
 } = chatSlice.actions;
 export default chatSlice.reducer;

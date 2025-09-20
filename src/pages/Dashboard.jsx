@@ -8,12 +8,12 @@ const Dashboard = () => {
   const { sidebarCollapsed } = useSelector((state) => state.ui);
 
   return (
-    <div className="h-screen bg-white flex flex-col overflow-hidden">
+    <div className="h-screen bg-white flex flex-col">
       {/* Header - Full Width */}
       <Header />
       
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex min-h-0">
         {/* Mobile Sidebar Overlay */}
         {!sidebarCollapsed && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden" />
@@ -27,7 +27,7 @@ const Dashboard = () => {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0 h-full">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <ChatArea />
         </div>
       </div>

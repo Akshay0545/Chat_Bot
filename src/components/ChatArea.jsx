@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Send, User, Bot, Sparkles, Search, Copy, ThumbsUp, ThumbsDown, MoreHorizontal } from 'lucide-react';
+import { Send, User, Bot, Sparkles, Search, Copy, ThumbsUp, ThumbsDown, MoreHorizontal, Pause } from 'lucide-react';
 import { addMessage, setTyping, addConversation, setActiveConversation } from '../store/chatSlice';
 import { updateCredits } from '../store/authSlice';
 import aiService from '../services/aiService';
@@ -14,9 +14,11 @@ const ChatArea = () => {
   const [likedMessageId, setLikedMessageId] = useState(null);
   const [dislikedMessageId, setDislikedMessageId] = useState(null);
   const [hoveredMessageId, setHoveredMessageId] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
+  const aiResponseRef = useRef(null);
 
   const suggestedPrompts = [
     'Explain quantum computing in simple terms',
@@ -76,6 +78,7 @@ const ChatArea = () => {
 
     dispatch(addMessage(userMessage));
     setInputValue('');
+    console.log('Setting typing to true');
     dispatch(setTyping(true));
 
     // Deduct credits
@@ -89,7 +92,17 @@ const ChatArea = () => {
         content: msg.content
       }));
 
-      const aiResponse = await aiService.generateResponse(inputValue, conversationHistory);
+      // Create a cancellable promise for AI response
+      const aiResponsePromise = aiService.generateResponse(inputValue, conversationHistory);
+      aiResponseRef.current = aiResponsePromise;
+
+      const aiResponse = await aiResponsePromise;
+      
+      // Check if the response was cancelled
+      if (isPaused) {
+        dispatch(setTyping(false));
+        return;
+      }
       
       const aiMessage = {
         id: Date.now() + 1,
@@ -101,6 +114,11 @@ const ChatArea = () => {
       
       dispatch(addMessage(aiMessage));
     } catch (error) {
+      if (isPaused) {
+        console.log('AI response was paused');
+        dispatch(setTyping(false));
+        return;
+      }
       console.error('AI response error:', error);
       const errorMessage = {
         id: Date.now() + 1,
@@ -111,7 +129,10 @@ const ChatArea = () => {
       };
       dispatch(addMessage(errorMessage));
     } finally {
+      console.log('Setting typing to false');
       dispatch(setTyping(false));
+      setIsPaused(false);
+      aiResponseRef.current = null;
     }
   };
 
@@ -159,12 +180,25 @@ const ChatArea = () => {
     }, 2000); // Hide after 2 seconds
   };
 
+  const handlePause = () => {
+    if (isTyping) {
+      setIsPaused(true);
+      dispatch(setTyping(false));
+      // Cancel the AI response if possible
+      if (aiResponseRef.current) {
+        // Note: This is a simplified approach. In a real implementation,
+        // you might want to use AbortController for proper cancellation
+        console.log('Pausing AI response');
+      }
+    }
+  };
+
   const currentConversation = conversations.find(c => c.id === activeConversation);
   const conversationMessages = messages.filter(m => m.conversationId === activeConversation);
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 h-full">
-      <div className="flex-1 overflow-y-auto min-h-0">
+    <div className="flex-1 flex flex-col bg-gray-50 min-h-0">
+      <div className="flex-1 overflow-y-auto">
         {conversationMessages.length === 0 ? (
           // Empty State
           <div className="h-full flex flex-col items-center justify-center p-6 lg:p-12 text-center">
@@ -232,7 +266,7 @@ const ChatArea = () => {
                   </div>
                   
                   {/* Action buttons for AI messages - positioned below the dialog box */}
-                  {message.sender === 'ai' && hoveredMessageId === message.id && (
+                  {message.sender === 'ai' && (
                     <div className="flex items-center space-x-2 mt-2 opacity-100 transition-opacity duration-300">
                       <button
                         onClick={() => handleCopyMessage(message.content, message.id)}
@@ -314,7 +348,7 @@ const ChatArea = () => {
         <div className="max-w-4xl mx-auto">
           <div className="relative bg-gray-100 rounded-2xl border border-gray-200 focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search size={18} className="text-gray-400" />
+              <Search size={16} className="text-gray-400" />
             </div>
             <textarea
               ref={textareaRef}
@@ -327,13 +361,23 @@ const ChatArea = () => {
               style={{ minHeight: '48px', maxHeight: '160px' }}
               maxLength={2000}
             />
-            <button
-              onClick={handleSend}
-              disabled={!inputValue.trim() || isTyping}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-            >
-              <Send size={16} />
-            </button>
+            {isTyping ? (
+              <button
+                onClick={handlePause}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+                title="Pause AI response"
+              >
+                <Pause size={16} />
+              </button>
+            ) : (
+              <button
+                onClick={handleSend}
+                disabled={!inputValue.trim()}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              >
+                <Send size={16} />
+              </button>
+            )}
           </div>
           <div className="flex justify-between items-center mt-3 text-xs text-gray-500 px-2">
             <span>Press Enter to send, Shift+Enter for new line</span>

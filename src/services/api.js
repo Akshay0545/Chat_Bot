@@ -88,6 +88,13 @@ class ApiService {
     });
   }
 
+  async updateConversation(conversationId, title) {
+    return this.request(`/chat/conversations/${conversationId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ title }),
+    });
+  }
+
   // User endpoints
   async getUserProfile() {
     return this.request('/user/profile');
