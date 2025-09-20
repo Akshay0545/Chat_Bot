@@ -1,0 +1,25 @@
+# AI Service Configuration
+# Copy this file to .env and add your actual API keys
+
+# Google Gemini Configuration (Currently Active)
+VITE_AI_API_KEY=AIzaSyA_QuL-euP6qU6qII1rpdm4fQIDFZEcQYg
+VITE_AI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent
+VITE_AI_MODEL=gemini-1.5-flash
+
+# Alternative AI Services
+# For OpenAI:
+# VITE_AI_API_KEY=your_openai_api_key_here
+# VITE_AI_API_URL=https://api.openai.com/v1/chat/completions
+# VITE_AI_MODEL=gpt-3.5-turbo
+
+# For Anthropic Claude:
+# VITE_AI_API_KEY=your_anthropic_api_key_here
+# VITE_AI_API_URL=https://api.anthropic.com/v1/messages
+# VITE_AI_MODEL=claude-3-sonnet-20240229
+
+# For local AI (Ollama):
+# VITE_AI_API_KEY=not_needed
+# VITE_AI_API_URL=http://localhost:11434/api/generate
+# VITE_AI_MODEL=llama2
+
+# Note: Gemini API is now configured and ready to use!
