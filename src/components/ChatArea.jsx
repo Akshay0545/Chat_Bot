@@ -201,27 +201,27 @@ const ChatArea = () => {
       <div className="flex-1 overflow-y-auto">
         {conversationMessages.length === 0 ? (
           // Empty State
-          <div className="h-full flex flex-col items-center justify-center p-6 lg:p-12 text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg">
-              <Sparkles size={36} className="text-white" />
+          <div className="h-full flex flex-col items-center justify-center p-4 lg:p-8 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+              <Sparkles size={28} className="text-white" />
             </div>
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3">Welcome to AI Chat</h2>
-            <p className="text-gray-600 mb-12 max-w-md text-base lg:text-lg leading-relaxed">
+            <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3">Welcome to AI Chat</h2>
+            <p className="text-gray-600 mb-8 max-w-md text-sm lg:text-base leading-relaxed">
               Start a conversation with our AI assistant. Ask questions, get help with tasks, or explore ideas together.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full">
               {suggestedPrompts.map((prompt, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestedPrompt(prompt)}
-                  className="p-6 text-left border border-gray-200 rounded-2xl hover:bg-white hover:border-blue-200 hover:shadow-lg transition-all duration-200 group"
+                  className="p-4 text-left border border-gray-200 rounded-xl hover:bg-white hover:border-blue-200 hover:shadow-lg transition-all duration-200 group"
                 >
                   <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-blue-200 transition-colors duration-200">
-                      <Bot size={16} className="text-blue-600" />
+                    <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-blue-200 transition-colors duration-200">
+                      <Bot size={12} className="text-blue-600" />
                     </div>
-                    <span className="text-gray-700 text-sm font-medium leading-relaxed">{prompt}</span>
+                    <span className="text-gray-700 text-xs font-medium leading-relaxed">{prompt}</span>
                   </div>
                 </button>
               ))}
@@ -229,7 +229,7 @@ const ChatArea = () => {
           </div>
         ) : (
           // Messages
-          <div className="p-4 lg:p-8 space-y-6 max-w-4xl mx-auto w-full">
+          <div className="p-3 lg:p-6 space-y-4 max-w-3xl mx-auto w-full">
             {conversationMessages.map((message) => (
               <div
                 key={message.id}
@@ -240,14 +240,14 @@ const ChatArea = () => {
                 onMouseLeave={() => message.sender === 'ai' && handleMouseLeave()}
               >
                 {message.sender === 'ai' && (
-                  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <Bot size={18} className="text-white" />
+                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <Bot size={12} className="text-white" />
                   </div>
                 )}
                 
-                <div className={`max-w-2xl ${message.sender === 'user' ? 'order-first' : ''}`}>
+                <div className={`max-w-xl ${message.sender === 'user' ? 'order-first' : ''}`}>
                   <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-xs font-semibold text-gray-900">
                       {message.sender === 'user' ? 'You' : 'AI Assistant'}
                     </span>
                     <span className="text-xs text-gray-500">
@@ -257,63 +257,63 @@ const ChatArea = () => {
                       })}
                     </span>
                   </div>
-                  <div className={`p-4 lg:p-6 rounded-2xl shadow-sm ${
+                  <div className={`p-3 lg:p-4 rounded-xl shadow-sm ${
                     message.sender === 'user'
                       ? 'bg-blue-600 text-white'
                       : 'bg-white text-gray-900 border border-gray-100'
                   }`}>
-                    <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    <p className="whitespace-pre-wrap leading-relaxed text-sm">{message.content}</p>
                   </div>
                   
                   {/* Action buttons for AI messages - positioned below the dialog box */}
                   {message.sender === 'ai' && (
-                    <div className="flex items-center space-x-2 mt-2 opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center space-x-1.5 mt-2 opacity-100 transition-opacity duration-300">
                       <button
                         onClick={() => handleCopyMessage(message.content, message.id)}
-                        className={`p-2 rounded-lg transition-all duration-200 ${
+                        className={`p-1.5 rounded-md transition-all duration-200 ${
                           copiedMessageId === message.id
                             ? 'text-blue-600 bg-blue-100'
                             : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
                         }`}
                         title="Copy message"
                       >
-                        <Copy size={16} />
+                          <Copy size={12} />
                       </button>
                       <button
                         onClick={() => handleLikeMessage(message.id)}
-                        className={`p-2 rounded-lg transition-all duration-200 ${
+                        className={`p-1.5 rounded-md transition-all duration-200 ${
                           likedMessageId === message.id
                             ? 'text-green-600 bg-green-100'
                             : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
                         }`}
                         title="Good response"
                       >
-                        <ThumbsUp size={16} />
+                          <ThumbsUp size={12} />
                       </button>
                       <button
                         onClick={() => handleDislikeMessage(message.id)}
-                        className={`p-2 rounded-lg transition-all duration-200 ${
+                        className={`p-1.5 rounded-md transition-all duration-200 ${
                           dislikedMessageId === message.id
                             ? 'text-red-600 bg-red-100'
                             : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                         }`}
                         title="Poor response"
                       >
-                        <ThumbsDown size={16} />
+                          <ThumbsDown size={12} />
                       </button>
                       <button
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
                         title="More options"
                       >
-                        <MoreHorizontal size={16} />
+                        <MoreHorizontal size={12} />
                       </button>
                     </div>
                   )}
                 </div>
 
                 {message.sender === 'user' && (
-                  <div className="w-10 h-10 bg-gray-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <User size={18} className="text-white" />
+                  <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <User size={12} className="text-white" />
                   </div>
                 )}
               </div>
@@ -321,8 +321,8 @@ const ChatArea = () => {
 
             {isTyping && (
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Bot size={18} className="text-white" />
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <Bot size={12} className="text-white" />
                 </div>
                 <div className="max-w-2xl">
                   <div className="flex items-center space-x-3 mb-2">

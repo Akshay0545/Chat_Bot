@@ -80,21 +80,21 @@ const SignUp = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Sign Up</h1>
-            <p className="text-gray-600">Create your account to get started</p>
+        <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-4 sm:p-6">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign Up</h1>
+            <p className="text-gray-600 text-sm">Create your account to get started</p>
           </div>
 
           {(error || validationError) && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs">
               {error || validationError}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-semibold text-gray-900 mb-3">
+              <label htmlFor="username" className="block text-xs font-semibold text-gray-900 mb-2">
                 Username
               </label>
               <input
@@ -104,13 +104,13 @@ const SignUp = () => {
                 required
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
                 placeholder="Enter your username"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-3">
+              <label htmlFor="email" className="block text-xs font-semibold text-gray-900 mb-2">
                 Email
               </label>
               <input
@@ -120,13 +120,13 @@ const SignUp = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
                 placeholder="Enter your email"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-900 mb-3">
+              <label htmlFor="password" className="block text-xs font-semibold text-gray-900 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -137,15 +137,15 @@ const SignUp = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-4 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  className="w-full px-3 py-3 pr-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
               
@@ -227,13 +227,13 @@ const SignUp = () => {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full px-4 py-4 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  className="w-full px-3 py-3 pr-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
                   placeholder="Confirm your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -243,14 +243,14 @@ const SignUp = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-sm"
             >
               {loading ? 'Creating Account...' : 'Sign Up'}
             </button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
+          <div className="mt-6 text-center">
+            <p className="text-gray-600 text-xs">
               Already have an account?{' '}
               <Link to="/signin" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200">
                 Sign in

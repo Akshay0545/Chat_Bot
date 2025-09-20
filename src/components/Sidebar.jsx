@@ -145,30 +145,30 @@ const Sidebar = () => {
 
   return (
     <div className="h-full bg-white flex flex-col w-full min-h-0">
-      <div className={`${sidebarCollapsed ? 'p-3' : 'p-4 lg:p-6'} border-b border-gray-200`}>
+      <div className={`${sidebarCollapsed ? 'p-1.5' : 'p-3 lg:p-4'} border-b border-gray-200`}>
         <div className={`flex items-center ${sidebarCollapsed ? 'justify-center mb-4' : 'justify-between mb-6'}`}>
-          {!sidebarCollapsed && <h2 className="text-lg font-bold text-gray-900">Conversations</h2>}
+          {!sidebarCollapsed && <h2 className="text-base font-bold text-gray-900">Conversations</h2>}
           <button
             onClick={() => dispatch(toggleSidebar())}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
           >
-            {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+            {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
         </div>
         {sidebarCollapsed ? (
           <button
             onClick={handleNewChat}
-            className="w-full bg-blue-600 text-white p-3 rounded-xl font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
+            className="w-full bg-blue-600 text-white p-1.5 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
             title="New Chat"
           >
-            <Plus size={20} />
+            <Plus size={16} />
           </button>
         ) : (
           <button
             onClick={handleNewChat}
-            className="w-full bg-blue-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
+            className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
           >
-            <Plus size={18} />
+            <Plus size={14} />
             <span>New Chat</span>
           </button>
         )}
@@ -176,18 +176,18 @@ const Sidebar = () => {
 
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
-          <div className={`text-center ${sidebarCollapsed ? 'p-4' : 'p-8'}`}>
-            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <MessageSquare size={28} className="text-gray-400" />
+          <div className={`text-center ${sidebarCollapsed ? 'p-1.5' : 'p-6'}`}>
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <MessageSquare size={20} className="text-gray-400" />
             </div>
-            {!sidebarCollapsed && <p className="text-gray-500 text-sm font-medium">No conversations yet</p>}
+            {!sidebarCollapsed && <p className="text-gray-500 text-xs font-medium">No conversations yet</p>}
           </div>
         ) : (
-          <div className="p-3 space-y-2">
+          <div className="p-2 space-y-1.5">
             {conversations.map((conversation) => (
               <div
                 key={conversation.id}
-                className={`relative group rounded-xl transition-all duration-200 ${
+                className={`relative group rounded-xl transition-all duration-300 ease-in-out ${
                   activeConversation === conversation.id
                     ? 'bg-blue-50 border-2 border-blue-200 shadow-sm'
                     : 'hover:bg-gray-50 border-2 border-transparent'
@@ -197,19 +197,19 @@ const Sidebar = () => {
               >
                 <button
                   onClick={() => handleConversationClick(conversation.id)}
-                  className={`w-full text-left transition-all duration-200 ${
-                    sidebarCollapsed ? 'p-3 flex justify-center' : 'p-4'
+                  className={`w-full text-left transition-all duration-300 ease-in-out ${
+                    sidebarCollapsed ? 'p-1.5 flex justify-center' : 'p-3'
                   }`}
                   title={sidebarCollapsed ? conversation.title : ''}
                 >
                   {sidebarCollapsed ? (
-                    <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <MessageSquare size={16} className="text-gray-600" />
+                    <div className="w-6 h-6 bg-gray-200 rounded-md flex items-center justify-center">
+                      <MessageSquare size={12} className="text-gray-600" />
                     </div>
                   ) : (
                     <div className="flex items-start justify-between w-full">
                       <div className="flex-1 min-w-0 pr-12">
-                        <h3 className="font-semibold text-gray-900 text-sm truncate mb-1">
+                        <h3 className="font-semibold text-gray-900 text-xs truncate mb-1">
                           {conversation.title}
                         </h3>
                         <p className="text-gray-500 text-xs truncate">

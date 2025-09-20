@@ -22,7 +22,7 @@ const Dashboard = () => {
         {/* Sidebar */}
         <div className={`${
           sidebarCollapsed ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
-        } fixed lg:relative z-30 lg:z-0 ${sidebarCollapsed ? 'lg:w-16' : 'w-80 lg:w-80'} h-full transition-all duration-300 ease-in-out ${!sidebarCollapsed ? 'border-r border-gray-200' : ''}`}>
+        } fixed lg:relative z-30 lg:z-0 ${sidebarCollapsed ? 'lg:w-20' : 'w-80 lg:w-80'} h-full transition-all duration-300 ease-in-out ${!sidebarCollapsed ? 'border-r border-gray-200' : ''}`}>
           <Sidebar />
         </div>
 
