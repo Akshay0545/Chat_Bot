@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Bell, ChevronDown, User, Menu, X } from 'lucide-react';
-import { toggleNotificationPanel, toggleSidebar } from '../store/uiSlice';
+import { toggleNotificationPanel, toggleSidebar, markAllNotificationsRead } from '../store/uiSlice';
 import { logout } from '../store/authSlice';
 
 const Header = () => {
@@ -16,8 +16,12 @@ const Header = () => {
     dispatch(logout());
   };
 
+  const handleMarkAllRead = () => {
+    dispatch(markAllNotificationsRead());
+  };
+
   return (
-    <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between relative z-10">
+    <header className="w-full bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between relative z-10">
       <div className="flex items-center space-x-4">
         <button
           onClick={() => dispatch(toggleSidebar())}
@@ -65,8 +69,16 @@ const Header = () => {
                 onClick={() => dispatch(toggleNotificationPanel(false))}
               />
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-20">
-                <div className="px-4 py-3 border-b border-gray-100">
+                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={handleMarkAllRead}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.map((notification) => (

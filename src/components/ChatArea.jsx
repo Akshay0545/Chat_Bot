@@ -13,8 +13,10 @@ const ChatArea = () => {
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const [likedMessageId, setLikedMessageId] = useState(null);
   const [dislikedMessageId, setDislikedMessageId] = useState(null);
+  const [hoveredMessageId, setHoveredMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const hoverTimeoutRef = useRef(null);
 
   const suggestedPrompts = [
     'Explain quantum computing in simple terms',
@@ -30,6 +32,15 @@ const ChatArea = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -135,6 +146,19 @@ const ChatArea = () => {
     setTimeout(() => setDislikedMessageId(null), 2000);
   };
 
+  const handleMouseEnter = (messageId) => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setHoveredMessageId(messageId);
+  };
+
+  const handleMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredMessageId(null);
+    }, 2000); // Hide after 2 seconds
+  };
+
   const currentConversation = conversations.find(c => c.id === activeConversation);
   const conversationMessages = messages.filter(m => m.conversationId === activeConversation);
 
@@ -178,6 +202,8 @@ const ChatArea = () => {
                 className={`flex items-start space-x-4 ${
                   message.sender === 'user' ? 'justify-end' : 'justify-start'
                 }`}
+                onMouseEnter={() => message.sender === 'ai' && handleMouseEnter(message.id)}
+                onMouseLeave={() => message.sender === 'ai' && handleMouseLeave()}
               >
                 {message.sender === 'ai' && (
                   <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
@@ -203,52 +229,52 @@ const ChatArea = () => {
                       : 'bg-white text-gray-900 border border-gray-100'
                   }`}>
                     <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                    
-                    {/* Action buttons for AI messages */}
-                    {message.sender === 'ai' && (
-                      <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-gray-100">
-                        <button
-                          onClick={() => handleCopyMessage(message.content, message.id)}
-                          className={`p-2 rounded-lg transition-all duration-200 ${
-                            copiedMessageId === message.id
-                              ? 'text-blue-600 bg-blue-100'
-                              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                          }`}
-                          title="Copy message"
-                        >
-                          <Copy size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleLikeMessage(message.id)}
-                          className={`p-2 rounded-lg transition-all duration-200 ${
-                            likedMessageId === message.id
-                              ? 'text-green-600 bg-green-100'
-                              : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
-                          }`}
-                          title="Good response"
-                        >
-                          <ThumbsUp size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDislikeMessage(message.id)}
-                          className={`p-2 rounded-lg transition-all duration-200 ${
-                            dislikedMessageId === message.id
-                              ? 'text-red-600 bg-red-100'
-                              : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                          }`}
-                          title="Poor response"
-                        >
-                          <ThumbsDown size={16} />
-                        </button>
-                        <button
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
-                          title="More options"
-                        >
-                          <MoreHorizontal size={16} />
-                        </button>
-                      </div>
-                    )}
                   </div>
+                  
+                  {/* Action buttons for AI messages - positioned below the dialog box */}
+                  {message.sender === 'ai' && hoveredMessageId === message.id && (
+                    <div className="flex items-center space-x-2 mt-2 opacity-100 transition-opacity duration-300">
+                      <button
+                        onClick={() => handleCopyMessage(message.content, message.id)}
+                        className={`p-2 rounded-lg transition-all duration-200 ${
+                          copiedMessageId === message.id
+                            ? 'text-blue-600 bg-blue-100'
+                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                        }`}
+                        title="Copy message"
+                      >
+                        <Copy size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleLikeMessage(message.id)}
+                        className={`p-2 rounded-lg transition-all duration-200 ${
+                          likedMessageId === message.id
+                            ? 'text-green-600 bg-green-100'
+                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                        }`}
+                        title="Good response"
+                      >
+                        <ThumbsUp size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDislikeMessage(message.id)}
+                        className={`p-2 rounded-lg transition-all duration-200 ${
+                          dislikedMessageId === message.id
+                            ? 'text-red-600 bg-red-100'
+                            : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                        }`}
+                        title="Poor response"
+                      >
+                        <ThumbsDown size={16} />
+                      </button>
+                      <button
+                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                        title="More options"
+                      >
+                        <MoreHorizontal size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {message.sender === 'user' && (

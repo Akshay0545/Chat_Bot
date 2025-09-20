@@ -44,6 +44,11 @@ const uiSlice = createSlice({
         notification.read = true;
       }
     },
+    markAllNotificationsRead: (state) => {
+      state.notifications.forEach(notification => {
+        notification.read = true;
+      });
+    },
   },
 });
 
@@ -51,6 +56,7 @@ export const {
   toggleSidebar, 
   toggleNotificationPanel, 
   addNotification, 
-  markNotificationRead 
+  markNotificationRead,
+  markAllNotificationsRead
 } = uiSlice.actions;
 export default uiSlice.reducer;
