@@ -8,18 +8,14 @@ const router = express.Router();
 // Register new user
 router.post('/register', validateRegister, async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
-    });
+    const existingUser = await User.findOne({ username });
 
     if (existingUser) {
       return res.status(409).json({
-        message: existingUser.email === email 
-          ? 'Email already registered' 
-          : 'Username already taken',
+        message: 'Username already taken',
         code: 'USER_EXISTS'
       });
     }
@@ -27,7 +23,6 @@ router.post('/register', validateRegister, async (req, res) => {
     // Create new user
     const user = new User({
       username,
-      email,
       password
     });
 
@@ -46,7 +41,6 @@ router.post('/register', validateRegister, async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email,
         credits: user.credits,
         plan: user.plan,
         preferences: user.preferences
@@ -57,9 +51,15 @@ router.post('/register', validateRegister, async (req, res) => {
 
   } catch (error) {
     console.error('Registration error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     res.status(500).json({
       message: 'Registration failed',
-      code: 'REGISTRATION_ERROR'
+      code: 'REGISTRATION_ERROR',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -67,13 +67,13 @@ router.post('/register', validateRegister, async (req, res) => {
 // Login user
 router.post('/login', validateLogin, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    // Find user by email
-    const user = await User.findOne({ email });
+    // Find user by username
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid email or password',
+        message: 'Invalid username or password',
         code: 'INVALID_CREDENTIALS'
       });
     }
@@ -90,7 +90,7 @@ router.post('/login', validateLogin, async (req, res) => {
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: 'Invalid email or password',
+        message: 'Invalid username or password',
         code: 'INVALID_CREDENTIALS'
       });
     }
@@ -108,7 +108,6 @@ router.post('/login', validateLogin, async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email,
         credits: user.credits,
         plan: user.plan,
         preferences: user.preferences,
@@ -203,7 +202,6 @@ router.get('/me', async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email,
         credits: user.credits,
         plan: user.plan,
         preferences: user.preferences,

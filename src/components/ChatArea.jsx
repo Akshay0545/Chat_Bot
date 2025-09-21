@@ -238,9 +238,7 @@ const ChatArea = () => {
             {conversationMessages.map((message) => (
               <div
                 key={message.id}
-                className={`flex items-start space-x-4 ${
-                  message.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className="flex items-start space-x-4 justify-start"
                 onMouseEnter={() => message.sender === 'ai' && handleMouseEnter(message.id)}
                 onMouseLeave={() => message.sender === 'ai' && handleMouseLeave()}
               >
@@ -250,7 +248,13 @@ const ChatArea = () => {
                   </div>
                 )}
                 
-                <div className={`max-w-xl ${message.sender === 'user' ? 'order-first' : ''}`}>
+                {message.sender === 'user' && (
+                  <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <User size={12} className="text-white" />
+                  </div>
+                )}
+                
+                <div className="max-w-xl">
                   <div className="flex items-center space-x-3 mb-2">
                     <span className="text-xs font-semibold text-gray-900">
                       {message.sender === 'user' ? 'You' : 'AI Assistant'}
@@ -315,12 +319,6 @@ const ChatArea = () => {
                     </div>
                   )}
                 </div>
-
-                {message.sender === 'user' && (
-                  <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <User size={12} className="text-white" />
-                  </div>
-                )}
               </div>
             ))}
 

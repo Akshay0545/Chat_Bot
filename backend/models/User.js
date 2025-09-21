@@ -10,14 +10,6 @@ const userSchema = new mongoose.Schema({
     minlength: [3, 'Username must be at least 3 characters long'],
     maxlength: [30, 'Username cannot exceed 30 characters']
   },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    lowercase: true,
-    trim: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-  },
   password: {
     type: String,
     required: [true, 'Password is required'],
@@ -87,8 +79,6 @@ userSchema.methods.toJSON = function() {
   return user;
 };
 
-// Index for better performance
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
+// Index for better performance (username index is already created by unique: true)
 
 module.exports = mongoose.model('User', userSchema);

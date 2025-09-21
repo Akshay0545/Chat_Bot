@@ -10,7 +10,6 @@ const SignUp = () => {
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
     password: '',
     confirmPassword: '',
   });
@@ -41,9 +40,17 @@ const SignUp = () => {
   }, [dispatch]);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Validate username for spaces
+    if (name === 'username' && value.includes(' ')) {
+      setValidationError('Username cannot contain spaces');
+      return;
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
     setValidationError('');
     if (error) {
@@ -68,7 +75,6 @@ const SignUp = () => {
     try {
       await dispatch(registerUser({
         username: formData.username,
-        email: formData.email,
         password: formData.password
       })).unwrap();
       navigate('/dashboard');
@@ -109,21 +115,6 @@ const SignUp = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-xs font-semibold text-gray-900 mb-2">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
-                placeholder="Enter your email"
-              />
-            </div>
 
             <div>
               <label htmlFor="password" className="block text-xs font-semibold text-gray-900 mb-2">
