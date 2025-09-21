@@ -37,7 +37,10 @@ app.use('/api/', limiter);
 // CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://chat-bot-ten-rouge.vercel.app'] 
+    ? [
+        'https://chat-bot-ten-rouge.vercel.app',
+        'https://chat-bot-git-main-akshay-kashyaps-projects-650ab87d.vercel.app'
+      ] 
     : ['http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -122,7 +125,7 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 CORS enabled for: ${process.env.NODE_ENV === 'production' ? 'https://chat-bot-ten-rouge.vercel.app' : 'http://localhost:3000'}`);
+  console.log(`🌐 CORS enabled for: ${process.env.NODE_ENV === 'production' ? 'https://chat-bot-ten-rouge.vercel.app, https://chat-bot-git-main-akshay-kashyaps-projects-650ab87d.vercel.app' : 'http://localhost:3000'}`);
 });
 
 module.exports = { app, io };
