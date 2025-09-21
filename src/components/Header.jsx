@@ -115,7 +115,7 @@ const Header = () => {
             </div>
             <div className="hidden sm:block text-left">
               <p className="text-xs font-semibold text-gray-900 truncate max-w-32">
-                {user?.username || user?.email || 'akshaykashyap7879@gmail.com'}
+                {user?.username || 'akshay'}
               </p>
             </div>
             <ChevronDown size={16} className="text-gray-400" />

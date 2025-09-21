@@ -40,10 +40,6 @@ const userSchema = new mongoose.Schema({
       default: 'light'
     },
     notifications: {
-      email: {
-        type: Boolean,
-        default: true
-      },
       push: {
         type: Boolean,
         default: true

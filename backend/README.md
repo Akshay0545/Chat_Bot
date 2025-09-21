@@ -79,7 +79,7 @@ npm start
 ## Database Models
 
 ### User
-- username, email, password
+- username, password
 - credits, plan, preferences
 - isActive, lastLogin
 

@@ -14,7 +14,6 @@ router.get('/profile', async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email,
         credits: user.credits,
         plan: user.plan,
         preferences: user.preferences,
@@ -47,11 +46,6 @@ router.put('/profile', [
     .optional()
     .isIn(['light', 'dark'])
     .withMessage('Theme must be either light or dark'),
-  
-  body('preferences.notifications.email')
-    .optional()
-    .isBoolean()
-    .withMessage('Email notifications must be a boolean value'),
   
   body('preferences.notifications.push')
     .optional()
@@ -105,7 +99,6 @@ router.put('/profile', [
       user: {
         id: user._id,
         username: user.username,
-        email: user.email,
         credits: user.credits,
         plan: user.plan,
         preferences: user.preferences,

@@ -19,7 +19,7 @@ const SignUp = () => {
 
   // Password validation checks
   const passwordChecks = {
-    length: formData.password.length >= 8,
+    length: formData.password.length >= 6,
     uppercase: /[A-Z]/.test(formData.password),
     lowercase: /[a-z]/.test(formData.password),
     number: /\d/.test(formData.password)
@@ -155,7 +155,7 @@ const SignUp = () => {
                         </svg>
                       )}
                     </div>
-                    <span>At least 8 characters</span>
+                    <span>At least 6 characters</span>
                   </div>
                   
                   <div className={`flex items-center space-x-2 text-sm ${passwordChecks.uppercase ? 'text-green-600' : 'text-red-500'}`}>
