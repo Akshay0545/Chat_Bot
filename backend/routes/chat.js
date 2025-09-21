@@ -288,7 +288,8 @@ router.delete('/conversations/:conversationId', async (req, res) => {
     }
 
     res.json({
-      message: 'Conversation deleted successfully'
+      message: 'Conversation deleted successfully',
+      conversationId: conversationId
     });
 
   } catch (error) {
