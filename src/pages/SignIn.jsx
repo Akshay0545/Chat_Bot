@@ -53,11 +53,11 @@ const SignIn = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-25 to-indigo-50 flex items-center justify-center px-2.5 sm:px-4 lg:px-5 overflow-hidden">
-      <div className="max-w-sm w-full">
-        <div className="bg-white shadow-xl border-2 border-gray-200 p-2.5 sm:p-4" style={{borderRadius: '16px'}}>
-          <div className="text-center mb-4">
-            <h1 className="text-xl font-semibold text-gray-900 mb-1">Sign In</h1>
+    <div className="h-screen bg-gradient-to-br from-blue-25 to-indigo-50 flex items-center justify-center px-3 sm:px-5 lg:px-6 overflow-hidden">
+      <div className="max-w-md w-full">
+        <div className="bg-white shadow-xl border-2 border-gray-200 p-3 sm:p-5" style={{borderRadius: '16px'}}>
+          <div className="text-center mb-5">
+            <h1 className="text-xl font-semibold text-gray-900 mb-1.5">Sign In</h1>
             <p className="text-gray-600 text-xs">Enter your credentials to access your account</p>
           </div>
 
@@ -67,9 +67,9 @@ const SignIn = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-2.5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label htmlFor="username" className="block text-xs font-semibold text-gray-900 mb-1">
+              <label htmlFor="username" className="block text-xs font-semibold text-gray-900 mb-1.5">
                 Username
               </label>
               <input
@@ -85,7 +85,7 @@ const SignIn = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-semibold text-gray-900 mb-1">
+              <label htmlFor="password" className="block text-xs font-semibold text-gray-900 mb-1.5">
                 Password
               </label>
               <div className="relative">

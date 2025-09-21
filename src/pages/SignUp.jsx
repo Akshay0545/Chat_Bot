@@ -84,11 +84,11 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-25 to-indigo-50 flex items-center justify-center px-2.5 sm:px-4 lg:px-5 py-5">
-      <div className="max-w-sm w-full">
-        <div className="bg-white shadow-xl border-2 border-gray-200 p-2.5 sm:p-4" style={{borderRadius: '16px'}}>
-          <div className="text-center mb-4">
-            <h1 className="text-xl font-semibold text-[#1A1A1A] mb-1">Sign Up</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-25 to-indigo-50 flex items-center justify-center px-3 sm:px-5 lg:px-6 py-6">
+      <div className="max-w-md w-full">
+        <div className="bg-white shadow-xl border-2 border-gray-200 p-3 sm:p-5" style={{borderRadius: '16px'}}>
+          <div className="text-center mb-5">
+            <h1 className="text-xl font-semibold text-[#1A1A1A] mb-1.5">Sign Up</h1>
             <p className="text-gray-600 text-xs">Create your account to get started</p>
           </div>
 
@@ -98,9 +98,9 @@ const SignUp = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-2.5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label htmlFor="username" className="block text-xs font-semibold text-gray-900 mb-1">
+              <label htmlFor="username" className="block text-xs font-semibold text-gray-900 mb-1.5">
                 Username
               </label>
               <input
@@ -117,7 +117,7 @@ const SignUp = () => {
 
 
             <div>
-              <label htmlFor="password" className="block text-xs font-semibold text-gray-900 mb-1">
+              <label htmlFor="password" className="block text-xs font-semibold text-gray-900 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -207,7 +207,7 @@ const SignUp = () => {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-900 mb-1">
+              <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-900 mb-1.5">
                 Confirm Password
               </label>
               <div className="relative">
