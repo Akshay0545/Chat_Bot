@@ -158,10 +158,13 @@ const Sidebar = () => {
         {sidebarCollapsed ? (
           <button
             onClick={handleNewChat}
-            className="w-full bg-blue-600 text-white p-1.5 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background bg-blue-600 text-white hover:shadow-lg hover:shadow-blue/20 hover:bg-blue-700 active:scale-[0.98] text-xs w-10 h-10 p-0 rounded-xl shadow-md ml-3.5"
             title="New Chat"
           >
-            <Plus size={16} />
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus h-4 w-4" aria-hidden="true">
+              <path d="M5 12h14"></path>
+              <path d="M12 5v14"></path>
+            </svg>
           </button>
         ) : (
           <button
