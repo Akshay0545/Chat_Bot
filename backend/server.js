@@ -36,7 +36,9 @@ app.use('/api/', limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000'],
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://chat-bot-ten-rouge.vercel.app'] 
+    : ['http://localhost:3000'],
   credentials: true
 }));
 

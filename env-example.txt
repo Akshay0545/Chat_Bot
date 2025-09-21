@@ -1,6 +1,9 @@
 # AI Service Configuration
 # Copy this file to .env and add your actual API keys
 
+# Backend API Configuration
+VITE_API_URL=http://localhost:5000/api
+
 # Google Gemini Configuration (Currently Active)
 VITE_AI_API_KEY=AIzaSyA_QuL-euP6qU6qII1rpdm4fQIDFZEcQYg
 VITE_AI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent

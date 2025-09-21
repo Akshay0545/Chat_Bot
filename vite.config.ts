@@ -16,4 +16,13 @@ export default defineConfig({
       },
     },
   },
+  define: {
+    // Set production API URL if not provided via environment
+    'import.meta.env.VITE_API_URL': JSON.stringify(
+      process.env.VITE_API_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? 'https://chat-bot-4oy4.onrender.com/api' 
+        : 'http://localhost:5000/api')
+    ),
+  },
 });
