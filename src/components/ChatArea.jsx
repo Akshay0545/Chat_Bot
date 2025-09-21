@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Send, User, Bot, Sparkles, Search, Copy, ThumbsUp, ThumbsDown, MoreHorizontal, Pause } from 'lucide-react';
+import { Send, User, Bot, Search, Copy, ThumbsUp, ThumbsDown, MoreHorizontal, Pause } from 'lucide-react';
 import { addMessage, setTyping, addConversation, setActiveConversation } from '../store/chatSlice';
 import { updateCredits } from '../store/authSlice';
 import aiService from '../services/aiService';
@@ -203,7 +203,12 @@ const ChatArea = () => {
           // Empty State
           <div className="h-full flex flex-col items-center justify-center p-4 lg:p-8 text-center">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
-              <Sparkles size={28} className="text-white" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path>
+                <path d="M20 2v4"></path>
+                <path d="M22 4h-4"></path>
+                <circle cx="4" cy="20" r="2"></circle>
+              </svg>
             </div>
             <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3">Welcome to AI Chat</h2>
             <p className="text-gray-600 mb-8 max-w-md text-sm lg:text-base leading-relaxed">
