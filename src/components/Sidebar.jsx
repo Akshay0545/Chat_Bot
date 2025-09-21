@@ -285,7 +285,7 @@ const Sidebar = () => {
                   type="text"
                   value={renameValue}
                   onChange={(e) => setRenameValue(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-0 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
                   placeholder="Enter new name"
                   autoFocus
                   onKeyPress={(e) => {
