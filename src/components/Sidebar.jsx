@@ -186,7 +186,7 @@ const Sidebar = () => {
             {!sidebarCollapsed && <p className="text-gray-500 text-xs font-medium">No conversations yet</p>}
           </div>
         ) : (
-          <div className="p-2 space-y-1.5">
+          <div className="p-2 space-y-1">
             {conversations.map((conversation) => (
               <div
                 key={conversation.id}
@@ -201,26 +201,33 @@ const Sidebar = () => {
                 <button
                   onClick={() => handleConversationClick(conversation.id)}
                   className={`w-full text-left transition-all duration-300 ease-in-out ${
-                    sidebarCollapsed ? 'p-1.5 flex justify-center' : 'p-3'
+                    sidebarCollapsed ? 'p-1.5 flex justify-center' : 'p-2.5'
                   }`}
                   title={sidebarCollapsed ? conversation.title : ''}
                 >
                   {sidebarCollapsed ? (
-                    <div className="w-6 h-6 bg-gray-200 rounded-md flex items-center justify-center">
-                      <MessageSquare size={12} className="text-gray-600" />
+                    <div className="w-6 h-6 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-square h-4 w-4 text-gray-600" aria-hidden="true">
+                        <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
+                      </svg>
                     </div>
                   ) : (
-                    <div className="flex items-start justify-between w-full">
-                      <div className="flex-1 min-w-0 pr-12">
-                        <h3 className="font-semibold text-gray-900 text-xs truncate mb-1">
-                          {conversation.title}
-                        </h3>
-                        <p className="text-gray-500 text-xs truncate">
-                          {conversation.preview}
-                        </p>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0 pr-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-square h-4 w-4 text-gray-600 flex-shrink-0" aria-hidden="true">
+                          <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-xs truncate mb-0.5" style={{ fontSize: '10px' }}>
+                            {conversation.title}
+                          </h3>
+                          <p className="text-gray-500 truncate" style={{ fontSize: '10px' }}>
+                            {conversation.preview}
+                          </p>
+                        </div>
                       </div>
                       <div className="flex items-center space-x-2 flex-shrink-0 pr-8">
-                        <span className="text-xs text-gray-400 mt-0.5">
+                        <span className="text-gray-400" style={{ fontSize: '10px' }}>
                           {formatTime(conversation.timestamp)}
                         </span>
                       </div>

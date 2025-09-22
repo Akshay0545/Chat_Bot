@@ -15,6 +15,7 @@ const ChatArea = () => {
   const [dislikedMessageId, setDislikedMessageId] = useState(null);
   const [hoveredMessageId, setHoveredMessageId] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
@@ -193,6 +194,16 @@ const ChatArea = () => {
     }
   };
 
+  const handleMoreMenuClick = (e, messageId) => {
+    e.stopPropagation();
+    setMoreMenuOpen(moreMenuOpen === messageId ? null : messageId);
+  };
+
+  const handleMoreMenuCopy = (content, messageId) => {
+    handleCopyMessage(content, messageId);
+    setMoreMenuOpen(null);
+  };
+
   const currentConversation = conversations.find(c => c.id === activeConversation);
   const conversationMessages = messages.filter(m => m.conversationId === activeConversation);
 
@@ -202,7 +213,7 @@ const ChatArea = () => {
         {conversationMessages.length === 0 ? (
           // Empty State
           <div className="h-full flex flex-col items-center justify-center p-4 lg:p-8 text-center">
-            <div className="mb-6">
+            <div className="">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles h-16 w-16 mx-auto text-blue-600 mb-4" aria-hidden="true">
                 <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path>
                 <path d="M20 2v4"></path>
@@ -210,24 +221,22 @@ const ChatArea = () => {
                 <circle cx="4" cy="20" r="2"></circle>
               </svg>
             </div>
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3">Welcome to AI Chat</h2>
-            <p className="text-gray-600 mb-8 max-w-md text-sm lg:text-base leading-relaxed">
-              Start a conversation with our AI assistant. Ask questions, get help with tasks, or explore ideas together.
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to AI Chat</h2>
+            <p className="text-[#64748B] mb-6 max-w-2xl text-base leading-relaxed">
+              Start a conversation with our AI assistant. Ask questions, get help with tasks, or explore ideas<br />together.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl w-full">
               {suggestedPrompts.map((prompt, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestedPrompt(prompt)}
-                  className="p-4 text-left border border-gray-200 rounded-xl hover:bg-white hover:border-blue-200 hover:shadow-lg transition-all duration-200 group"
+                  className="group inline-flex items-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-gray-200 bg-white text-gray-700 shadow-sm hover:shadow-md hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-100 hover:text-blue-700 active:scale-[0.98] p-4 h-auto text-left justify-start"
                 >
-                  <div className="flex items-start space-x-4">
-                    <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 group-hover:bg-blue-200 transition-colors duration-200">
-                      <Bot size={12} className="text-blue-600" />
-                    </div>
-                    <span className="text-gray-700 text-xs font-medium leading-relaxed">{prompt}</span>
-                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-square h-4 w-4 mr-2 flex-shrink-0 text-blue-600 group-hover:text-blue-700 transition-colors duration-200" aria-hidden="true">
+                    <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  <span className="text-sm">{prompt}</span>
                 </button>
               ))}
             </div>
@@ -236,27 +245,31 @@ const ChatArea = () => {
           // Messages
           <div className="p-3 lg:p-6 space-y-4 max-w-3xl mx-auto w-full">
             {conversationMessages.map((message) => (
-              <div
+                <div
                 key={message.id}
-                className="flex items-start space-x-4 justify-start"
+                className="group flex gap-3 py-3 px-6 transition-colors bg-transparent"
                 onMouseEnter={() => message.sender === 'ai' && handleMouseEnter(message.id)}
                 onMouseLeave={() => message.sender === 'ai' && handleMouseLeave()}
               >
                 {message.sender === 'ai' && (
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <Bot size={12} className="text-white" />
-                  </div>
+                  <span data-slot="avatar" className="relative flex size-8 shrink-0 overflow-hidden rounded-full h-8 w-8">
+                    <span data-slot="avatar-fallback" className="flex size-full items-center justify-center rounded-full bg-blue-600">
+                      <Bot size={12} className="text-white" />
+                    </span>
+                  </span>
                 )}
                 
                 {message.sender === 'user' && (
-                  <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <User size={12} className="text-white" />
-                  </div>
+                  <span data-slot="avatar" className="relative flex size-8 shrink-0 overflow-hidden rounded-full h-8 w-8">
+                    <span data-slot="avatar-fallback" className="flex size-full items-center justify-center rounded-full bg-gray-200">
+                      <User size={12} className="text-gray-600" />
+                    </span>
+                  </span>
                 )}
                 
-                <div className="max-w-xl">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-xs font-semibold text-gray-900">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-medium text-sm text-gray-900">
                       {message.sender === 'user' ? 'You' : 'AI Assistant'}
                     </span>
                     <span className="text-xs text-gray-500">
@@ -266,56 +279,74 @@ const ChatArea = () => {
                       })}
                     </span>
                   </div>
-                  <div className={`p-3 lg:p-4 rounded-xl shadow-sm ${
-                    message.sender === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-900 border border-gray-100'
-                  }`}>
-                    <p className="whitespace-pre-wrap leading-relaxed text-sm">{message.content}</p>
+                  <div className="rounded-2xl p-4 shadow-sm" style={{ backgroundColor: '#FEFEFE' }}>
+                    <p className="whitespace-pre-wrap break-words m-0 text-gray-900 text-sm leading-relaxed">{message.content}</p>
                   </div>
                   
                   {/* Action buttons for AI messages - positioned below the dialog box */}
                   {message.sender === 'ai' && (
                     <div className="flex items-center space-x-1.5 mt-2 opacity-100 transition-opacity duration-300">
-                      <button
-                        onClick={() => handleCopyMessage(message.content, message.id)}
-                        className={`p-1.5 rounded-md transition-all duration-200 ${
-                          copiedMessageId === message.id
-                            ? 'text-blue-600 bg-blue-100'
-                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                        }`}
-                        title="Copy message"
-                      >
-                          <Copy size={12} />
-                      </button>
-                      <button
-                        onClick={() => handleLikeMessage(message.id)}
-                        className={`p-1.5 rounded-md transition-all duration-200 ${
-                          likedMessageId === message.id
-                            ? 'text-green-600 bg-green-100'
-                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
-                        }`}
-                        title="Good response"
-                      >
-                          <ThumbsUp size={12} />
-                      </button>
-                      <button
-                        onClick={() => handleDislikeMessage(message.id)}
-                        className={`p-1.5 rounded-md transition-all duration-200 ${
-                          dislikedMessageId === message.id
-                            ? 'text-red-600 bg-red-100'
-                            : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                        }`}
-                        title="Poor response"
-                      >
-                          <ThumbsDown size={12} />
-                      </button>
-                      <button
-                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
-                        title="More options"
-                      >
-                        <MoreHorizontal size={12} />
-                      </button>
+                      {moreMenuOpen === message.id ? (
+                        /* Show Copy Message Button when 3-dots is clicked */
+                        <button
+                          onClick={() => handleMoreMenuCopy(message.content, message.id)}
+                          className="flex items-center space-x-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                        >
+                          <Copy size={14} className="text-gray-500" />
+                          <span>Copy message</span>
+                        </button>
+                      ) : (
+                        /* Show normal action buttons */
+                        <>
+                          <button
+                            onClick={() => handleCopyMessage(message.content, message.id)}
+                            className={`p-1.5 rounded-md transition-all duration-200 ${
+                              copiedMessageId === message.id
+                                ? 'text-green-600 bg-green-100'
+                                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                            }`}
+                            title="Copy message"
+                          >
+                            {copiedMessageId === message.id ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-double h-3 w-3" aria-hidden="true">
+                                <path d="M18 6 7 17l-5-5"></path>
+                                <path d="m22 10-7.5 7.5L13 16"></path>
+                              </svg>
+                            ) : (
+                              <Copy size={12} />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleLikeMessage(message.id)}
+                            className={`p-1.5 rounded-md transition-all duration-200 ${
+                              likedMessageId === message.id
+                                ? 'text-green-600 bg-green-100'
+                                : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                            }`}
+                            title="Good response"
+                          >
+                              <ThumbsUp size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDislikeMessage(message.id)}
+                            className={`p-1.5 rounded-md transition-all duration-200 ${
+                              dislikedMessageId === message.id
+                                ? 'text-red-600 bg-red-100'
+                                : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                            }`}
+                            title="Poor response"
+                          >
+                              <ThumbsDown size={12} />
+                          </button>
+                          <button
+                            onClick={(e) => handleMoreMenuClick(e, message.id)}
+                            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
+                            title="More options"
+                          >
+                            <MoreHorizontal size={12} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -323,15 +354,17 @@ const ChatArea = () => {
             ))}
 
             {isTyping && (
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Bot size={12} className="text-white" />
-                </div>
-                <div className="max-w-2xl">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-sm font-semibold text-gray-900">AI Assistant</span>
+              <div className="flex gap-3 py-3 px-6">
+                <span data-slot="avatar" className="relative flex size-8 shrink-0 overflow-hidden rounded-full h-8 w-8">
+                  <span data-slot="avatar-fallback" className="flex size-full items-center justify-center rounded-full bg-blue-600">
+                    <Bot size={12} className="text-white" />
+                  </span>
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-medium text-sm text-gray-900">AI Assistant</span>
                   </div>
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                  <div className="rounded-2xl p-4 shadow-sm" style={{ backgroundColor: '#FEFEFE' }}>
                     <div className="flex space-x-2">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -350,35 +383,35 @@ const ChatArea = () => {
       <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
         <div className="max-w-4xl mx-auto">
           <div className="relative bg-gray-100 rounded-2xl border border-gray-200 focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search size={16} className="text-gray-400" />
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <Search size={14} className="text-gray-400" />
             </div>
             <textarea
               ref={textareaRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask me anything..."
-              className="w-full pl-10 pr-14 py-3 bg-transparent border-none resize-none focus:outline-none text-gray-900 placeholder-gray-500 text-base leading-relaxed"
+              placeholder="Type your message..."
+              className="w-full pl-10 pr-14 py-2.5 bg-transparent border-none resize-none focus:outline-none text-gray-900 placeholder-gray-500 leading-relaxed"
               rows="1"
-              style={{ minHeight: '48px', maxHeight: '160px' }}
+              style={{ minHeight: '44px', maxHeight: '160px', fontSize: '14px' }}
               maxLength={2000}
             />
             {isTyping ? (
               <button
                 onClick={handlePause}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="absolute right-1.5 top-1/2 transform -translate-y-1/2 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl opacity-70 hover:opacity-100"
                 title="Pause AI response"
               >
-                <Pause size={16} />
+                <Pause size={14} />
               </button>
             ) : (
               <button
                 onClick={handleSend}
                 disabled={!inputValue.trim()}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                className="absolute right-1.5 top-1/2 transform -translate-y-1/2 p-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               >
-                <Send size={16} />
+                <Send size={14} />
               </button>
             )}
           </div>
