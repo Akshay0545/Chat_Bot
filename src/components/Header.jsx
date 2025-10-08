@@ -1,9 +1,8 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
-import { toggleNotificationPanel, markAllNotificationsRead, addNotification } from '../store/uiSlice';
+import { toggleNotificationPanel, markAllNotificationsRead } from '../store/uiSlice';
 import { logout } from '../store/authSlice';
-import apiService from '../services/api';
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -42,56 +41,6 @@ const Header = () => {
           </span>
         </div>
 
-        {/* Test Notification Buttons */}
-        <div className="flex items-center space-x-1">
-          <div className="relative group">
-            <button
-              className="p-1.5 rounded-lg transition-all duration-200 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              title="More notification tests"
-            >
-              <span className="text-xs font-bold">10</span>
-            </button>
-            
-            {/* Notification Test Dropdown */}
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-              <div className="px-3 py-2 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-900 text-sm">Test Notifications</h3>
-              </div>
-              <div className="max-h-48 overflow-y-auto space-y-1">
-                <button
-                  onClick={() => apiService.request('/user/notifications/test', { method: 'POST' })}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors"
-                >
-                  🧪 Test Notification
-                </button>
-                <button
-                  onClick={() => apiService.request('/user/notifications/simulate-credit-purchase', { method: 'POST' })}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors"
-                >
-                  💳 Credit Purchase
-                </button>
-                <button
-                  onClick={() => apiService.request('/user/notifications/security-alert', { method: 'POST' })}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors"
-                >
-                  🚨 Security Alert
-                </button>
-                <button
-                  onClick={() => apiService.request('/user/notifications/system-maintenance', { method: 'POST' })}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors"
-                >
-                  🔧 System Maintenance (Global)
-                </button>
-                <button
-                  onClick={() => apiService.request('/user/notifications/new-feature', { method: 'POST' })}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors"
-                >
-                  🎉 New Feature (Global)
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Notifications */}
         <div className="relative">

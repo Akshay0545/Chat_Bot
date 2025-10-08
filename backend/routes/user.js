@@ -323,17 +323,17 @@ router.post('/notifications/test', async (req, res) => {
 // Simulate credit purchase notification
 router.post('/notifications/simulate-credit-purchase', async (req, res) => {
   try {
-    // Simulate adding 100 credits
-    await User.findByIdAndUpdate(req.user._id, { $inc: { credits: 100 } });
+    // Get current user credits for notification
+    const user = await User.findById(req.user._id).select('credits');
     
     const notification = await Notification.create({
       userId: req.user._id,
-      title: 'Credits Purchased!',
-      message: 'You have successfully purchased 100 credits! Your new balance is available now.',
-      type: 'success',
+      title: 'Credits Purchase Simulation',
+      message: `This is a test notification. Your current credits: ${user.credits}. No actual credits were added.`,
+      type: 'info',
       metadata: {
         source: 'billing',
-        priority: 'high'
+        priority: 'medium'
       }
     });
 
@@ -362,7 +362,7 @@ router.post('/notifications/system-maintenance', async (req, res) => {
     // Allow all authenticated users to send global notifications for testing
 
     const payload = {
-      title: 'System Maintenance',
+      title: '[Global] System Maintenance',
       message: 'Scheduled maintenance will occur tonight from 11 PM to 1 AM EST. Some features may be temporarily unavailable.',
       type: 'warning',
       timestamp: new Date().toISOString(),
@@ -388,7 +388,7 @@ router.post('/notifications/new-feature', async (req, res) => {
     // Allow all authenticated users to send global notifications for testing
 
     const payload = {
-      title: 'New Feature Available!',
+      title: '[Global] New Feature Available!',
       message: '🎉 Real-time notifications are now live! You can receive instant updates about your conversations, credits, and system announcements.',
       type: 'info',
       timestamp: new Date().toISOString(),

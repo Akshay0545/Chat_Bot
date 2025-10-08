@@ -15,6 +15,7 @@ const ChatArea = () => {
   const [hoveredMessageId, setHoveredMessageId] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
@@ -53,31 +54,64 @@ const ChatArea = () => {
   }, [inputValue]);
 
   const handleSend = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isLoading) return;
+
+    setIsLoading(true);
+    const currentInput = inputValue;
+    setInputValue(''); // Clear input immediately
 
     const userMessage = {
       id: Date.now(),
-      content: inputValue,
+      content: currentInput,
       sender: 'user',
       timestamp: new Date().toISOString(),
       conversationId: activeConversation,
     };
 
-    // If no active conversation, create one
+    // If no active conversation, create one via backend API
     if (!activeConversation) {
-      const newConversation = {
-        id: Date.now(),
-        title: inputValue.substring(0, 50) + (inputValue.length > 50 ? '...' : ''),
-        timestamp: new Date().toISOString(),
-        preview: inputValue.substring(0, 100),
-      };
-      dispatch(addConversation(newConversation));
-      dispatch(setActiveConversation(newConversation.id));
-      userMessage.conversationId = newConversation.id;
+      try {
+        const response = await fetch('/api/chat/conversations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            title: currentInput.substring(0, 50) + (currentInput.length > 50 ? '...' : '')
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const newConversation = {
+          id: data.conversation.id,
+          title: data.conversation.title,
+          timestamp: data.conversation.createdAt,
+          preview: currentInput.substring(0, 100),
+        };
+        dispatch(addConversation(newConversation));
+        dispatch(setActiveConversation(newConversation.id));
+        userMessage.conversationId = newConversation.id;
+      } catch (error) {
+        console.error('Failed to create conversation:', error);
+        // Fallback to local conversation
+        const newConversation = {
+          id: Date.now(),
+          title: currentInput.substring(0, 50) + (currentInput.length > 50 ? '...' : ''),
+          timestamp: new Date().toISOString(),
+          preview: currentInput.substring(0, 100),
+        };
+        dispatch(addConversation(newConversation));
+        dispatch(setActiveConversation(newConversation.id));
+        userMessage.conversationId = newConversation.id;
+      }
     }
 
     dispatch(addMessage(userMessage));
-    setInputValue('');
     console.log('Setting typing to true');
     dispatch(setTyping(true));
 
@@ -85,15 +119,18 @@ const ChatArea = () => {
 
     // Get AI response from backend API
     try {
+      const conversationId = activeConversation || userMessage.conversationId;
+      console.log('Sending message to conversation:', conversationId);
+      
       // Create a cancellable promise for backend API call
-      const apiPromise = fetch(`/api/chat/conversations/${activeConversation || userMessage.conversationId}/messages`, {
+      const apiPromise = fetch(`/api/chat/conversations/${conversationId}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          content: inputValue
+          content: currentInput
         })
       });
       aiResponseRef.current = apiPromise;
@@ -114,7 +151,7 @@ const ChatArea = () => {
       
       const aiMessage = {
         id: Date.now() + 1,
-        content: data.aiMessage.content,
+        content: data.message.content,
         sender: 'ai',
         timestamp: new Date().toISOString(),
         conversationId: activeConversation || userMessage.conversationId,
@@ -124,7 +161,10 @@ const ChatArea = () => {
       
       // Update credits from backend response
       if (data.credits !== undefined) {
+        console.log('Updating credits from backend:', data.credits);
         dispatch(updateCredits(data.credits));
+      } else {
+        console.log('No credits in backend response:', data);
       }
     } catch (error) {
       if (isPaused) {
@@ -133,9 +173,21 @@ const ChatArea = () => {
         return;
       }
       console.error('AI response error:', error);
+      
+      // Provide a contextual fallback response
+      let fallbackContent = "I'm sorry, I'm having trouble responding right now. Please try again.";
+      
+      if (error.message.includes('404')) {
+        fallbackContent = `I apologize, but I'm having trouble accessing the conversation. This might be a temporary issue. Your message "${currentInput}" was received, and I'll do my best to help you with it. Please try sending your message again.`;
+      } else if (error.message.includes('401') || error.message.includes('403')) {
+        fallbackContent = "I'm having trouble authenticating your request. Please try refreshing the page and sending your message again.";
+      } else {
+        fallbackContent = `I understand you're asking about "${currentInput}". While I'm experiencing some technical difficulties right now, I'd be happy to help you with this topic. Please try sending your message again in a moment.`;
+      }
+      
       const errorMessage = {
         id: Date.now() + 1,
-        content: "I'm sorry, I'm having trouble responding right now. Please try again.",
+        content: fallbackContent,
         sender: 'ai',
         timestamp: new Date().toISOString(),
         conversationId: activeConversation || userMessage.conversationId,
@@ -145,6 +197,7 @@ const ChatArea = () => {
       console.log('Setting typing to false');
       dispatch(setTyping(false));
       setIsPaused(false);
+      setIsLoading(false);
       aiResponseRef.current = null;
     }
   };
@@ -420,7 +473,7 @@ const ChatArea = () => {
             ) : (
               <button
                 onClick={handleSend}
-                disabled={!inputValue.trim()}
+                disabled={!inputValue.trim() || isLoading}
                 className="absolute right-1.5 top-1/2 transform -translate-y-1/2 p-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               >
                 <Send size={14} />

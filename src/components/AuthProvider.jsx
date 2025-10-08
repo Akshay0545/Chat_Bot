@@ -33,36 +33,77 @@ const AuthProvider = ({ children }) => {
   // Manage socket lifecycle when user auth state changes
   useEffect(() => {
     if (!user) {
+      console.log('No user, disconnecting socket');
       disconnectSocket();
       return;
     }
 
-    const s = connectSocket();
+    console.log('User authenticated, connecting socket for user:', user.username);
+    
+    // Clean up any existing socket first
+    disconnectSocket();
+    
+    let socketCleanup = null;
+    
+    // Small delay to ensure cleanup is complete
+    const timer = setTimeout(() => {
+      const s = connectSocket();
+      
+      if (!s) {
+        console.error('Failed to create socket connection');
+        return;
+      }
 
-    const onNotification = (payload) => {
-      console.log('Received notification:', payload);
-      dispatch(addNotification({
-        id: payload.id || Date.now(),
-        type: payload.type || 'system',
-        message: payload.message,
-        timestamp: payload.timestamp || new Date().toISOString(),
-        read: false,
-      }));
-    };
+      const onNotification = (payload) => {
+        console.log('Received notification for user:', user.username, 'Payload:', payload);
+        
+        // Verify notification is for current user
+        if (payload.userId && payload.userId !== user._id) {
+          console.log('Ignoring notification for different user:', payload.userId, 'Current user:', user._id);
+          return;
+        }
+        
+        dispatch(addNotification({
+          id: payload.id || Date.now(),
+          type: payload.type || 'system',
+          message: payload.message,
+          timestamp: payload.timestamp || new Date().toISOString(),
+          read: false,
+        }));
+      };
 
-    s.on('connect', () => {
-      console.log('Socket connected successfully');
-    });
+      const onConnect = () => {
+        console.log('Socket connected successfully for user:', user.username);
+      };
 
-    s.on('notification', onNotification);
-    s.on('connect_error', (err) => console.warn('WS connect_error', err?.message));
-    s.on('reconnect', () => {
-      console.log('WS reconnected');
-      // Optionally, re-fetch latest unread notifications here if needed
-    });
+      const onConnectError = (err) => {
+        console.warn('WS connect_error for user:', user.username, err?.message);
+      };
+
+      const onReconnect = () => {
+        console.log('WS reconnected for user:', user.username);
+      };
+
+      s.on('connect', onConnect);
+      s.on('notification', onNotification);
+      s.on('connect_error', onConnectError);
+      s.on('reconnect', onReconnect);
+
+      // Store cleanup function
+      socketCleanup = () => {
+        console.log('Cleaning up socket event listeners for user:', user.username);
+        s.off('connect', onConnect);
+        s.off('notification', onNotification);
+        s.off('connect_error', onConnectError);
+        s.off('reconnect', onReconnect);
+      };
+    }, 100);
 
     return () => {
-      s.off('notification', onNotification);
+      clearTimeout(timer);
+      if (socketCleanup) {
+        socketCleanup();
+      }
     };
   }, [user, dispatch]);
 

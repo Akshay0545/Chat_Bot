@@ -123,6 +123,16 @@ router.post('/login', validateLogin, async (req, res) => {
     });
     
     console.log('Created welcome back notification:', notification);
+    
+    // Always emit welcome back notification with delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    io.to(`user:${user._id}`).emit('notification', {
+      id: String(notification._id),
+      message: notification.message,
+      type: notification.type,
+      timestamp: notification.createdAt,
+      read: notification.isRead,
+    });
 
     // Check if this is the first login of the day
     const today = new Date();
@@ -198,8 +208,8 @@ router.post('/login', validateLogin, async (req, res) => {
       try {
         // System maintenance notification (global)
         const systemMaintenancePayload = {
-          title: 'System Maintenance',
-          message: 'Scheduled maintenance will occur tonight from 11 PM to 1 AM EST. Some features may be temporarily unavailable.',
+          title: '[Global] System Maintenance',
+          message: 'Scheduled maintenance will occur tonight from 11 PM to 1 AM EST. Some features may be temporarily unavailable. [Global]',
           type: 'warning',
           timestamp: new Date().toISOString(),
           read: false,
@@ -216,8 +226,8 @@ router.post('/login', validateLogin, async (req, res) => {
       try {
         // New feature notification (global)
         const newFeaturePayload = {
-          title: 'New Feature Available!',
-          message: '🎉 Real-time notifications are now live! You can receive instant updates about your conversations, credits, and system announcements.',
+          title: '[Global] New Feature Available!',
+          message: '🎉 Real-time notifications are now live! You can receive instant updates about your conversations, credits, and system announcements. [Global]',
           type: 'info',
           timestamp: new Date().toISOString(),
           read: false,

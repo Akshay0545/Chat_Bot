@@ -3,22 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   sidebarCollapsed: false,
   notificationPanelOpen: false,
-  notifications: [
-    {
-      id: 1,
-      type: 'welcome',
-      message: "Welcome to AI Chat. You have 1,250 credits to start with.",
-      timestamp: new Date().toISOString(),
-      read: false,
-    },
-    {
-      id: 2,
-      type: 'feature',
-      message: "New conversation export feature is now available.",
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-      read: false,
-    }
-  ],
+  notifications: [],
 };
 
 const uiSlice = createSlice({
@@ -37,6 +22,14 @@ const uiSlice = createSlice({
     },
     addNotification: (state, action) => {
       console.log('Adding notification to Redux:', action.payload);
+      
+      // Check if notification already exists to prevent duplicates
+      const existingNotification = state.notifications.find(n => n.id === action.payload.id);
+      if (existingNotification) {
+        console.log('Duplicate notification prevented:', action.payload.id);
+        return;
+      }
+      
       state.notifications.unshift(action.payload);
     },
     markNotificationRead: (state, action) => {

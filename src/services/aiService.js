@@ -4,8 +4,8 @@
 class AIService {
   constructor() {
     this.apiKey = import.meta.env.VITE_AI_API_KEY || 'AIzaSyA_QuL-euP6qU6qII1rpdm4fQIDFZEcQYg';
-    this.apiUrl = import.meta.env.VITE_AI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-    this.model = import.meta.env.VITE_AI_MODEL || 'gemini-1.5-flash';
+    this.apiUrl = import.meta.env.VITE_AI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    this.model = import.meta.env.VITE_AI_MODEL || 'gemini-2.5-flash';
   }
 
   async generateResponse(message, conversationHistory = []) {
