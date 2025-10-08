@@ -5,6 +5,12 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { validateMessage, validateConversation } = require('../middleware/validation');
 
+// Get io instance from global
+let io;
+const setIO = (ioInstance) => {
+  io = ioInstance;
+};
+
 const router = express.Router();
 
 // Get all conversations for the user
@@ -48,6 +54,27 @@ router.post('/conversations', validateConversation, async (req, res) => {
     });
 
     await conversation.save();
+
+    // Send notification for new conversation
+    const notification = await Notification.create({
+      userId: req.user._id,
+      title: 'New Conversation',
+      message: `You created a new conversation: "${conversation.title}"`,
+      type: 'info',
+      metadata: {
+        source: 'chat',
+        priority: 'low'
+      }
+    });
+
+    // Emit real-time notification
+    io.to(`user:${req.user._id}`).emit('notification', {
+      id: String(notification._id),
+      message: notification.message,
+      type: notification.type,
+      timestamp: notification.createdAt,
+      read: notification.isRead,
+    });
 
     res.status(201).json({
       message: 'Conversation created successfully',
@@ -196,6 +223,72 @@ router.post('/conversations/:conversationId/messages', validateMessage, async (r
     // Update user credits
     const updatedUser = await User.findById(req.user._id).select('credits');
 
+    // Check for low credits and send notification (trigger after 1-2 responses)
+    if (updatedUser.credits <= 1248 && updatedUser.credits > 0) {
+      const lowCreditsNotification = await Notification.create({
+        userId: req.user._id,
+        title: 'Low Credits Warning',
+        message: `You have ${updatedUser.credits} credits remaining. Consider upgrading your plan.`,
+        type: 'warning',
+        metadata: {
+          source: 'billing',
+          priority: 'high'
+        }
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+      io.to(`user:${req.user._id}`).emit('notification', {
+        id: String(lowCreditsNotification._id),
+        message: lowCreditsNotification.message,
+        type: lowCreditsNotification.type,
+        timestamp: lowCreditsNotification.createdAt,
+        read: lowCreditsNotification.isRead,
+      });
+    }
+
+    // Check for very low credits (urgent)
+    if (updatedUser.credits <= 1245 && updatedUser.credits > 0) {
+      const urgentCreditsNotification = await Notification.create({
+        userId: req.user._id,
+        title: 'URGENT: Very Low Credits',
+        message: `⚠️ Only ${updatedUser.credits} credits left! You'll be unable to use AI features soon. Purchase credits now!`,
+        type: 'error',
+        metadata: {
+          source: 'billing',
+          priority: 'urgent'
+        }
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 800));
+      io.to(`user:${req.user._id}`).emit('notification', {
+        id: String(urgentCreditsNotification._id),
+        message: urgentCreditsNotification.message,
+        type: urgentCreditsNotification.type,
+        timestamp: urgentCreditsNotification.createdAt,
+        read: urgentCreditsNotification.isRead,
+      });
+    }
+
+    // Send notification for AI response completion
+    const aiResponseNotification = await Notification.create({
+      userId: req.user._id,
+      title: 'AI Response Ready',
+      message: `AI has responded to your message in "${conversation.title}"`,
+      type: 'success',
+      metadata: {
+        source: 'chat',
+        priority: 'medium'
+      }
+    });
+
+    io.to(`user:${req.user._id}`).emit('notification', {
+      id: String(aiResponseNotification._id),
+      message: aiResponseNotification.message,
+      type: aiResponseNotification.type,
+      timestamp: aiResponseNotification.createdAt,
+      read: aiResponseNotification.isRead,
+    });
+
     res.json({
       message: 'Message sent successfully',
       userMessage: {
@@ -327,4 +420,4 @@ async function generateAIResponse(userMessage, settings) {
   };
 }
 
-module.exports = router;
+module.exports = { router, setIO };

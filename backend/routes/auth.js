@@ -1,7 +1,14 @@
 const express = require('express');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { generateToken, generateRefreshToken } = require('../middleware/auth');
 const { validateRegister, validateLogin } = require('../middleware/validation');
+
+// Get io instance from global
+let io;
+const setIO = (ioInstance) => {
+  io = ioInstance;
+};
 
 const router = express.Router();
 
@@ -102,6 +109,126 @@ router.post('/login', validateLogin, async (req, res) => {
     // Update last login
     user.lastLogin = new Date();
     await user.save();
+
+    // Send welcome back notification
+    const notification = await Notification.create({
+      userId: user._id,
+      title: 'Welcome Back!',
+      message: `Welcome back, ${user.username}! You have ${user.credits} credits remaining.`,
+      type: 'success',
+      metadata: {
+        source: 'system',
+        priority: 'low'
+      }
+    });
+    
+    console.log('Created welcome back notification:', notification);
+
+    // Check if this is the first login of the day
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastLogin = new Date(user.lastLogin);
+    lastLogin.setHours(0, 0, 0, 0);
+    
+    if (lastLogin < today) {
+      const firstMessageNotification = await Notification.create({
+        userId: user._id,
+        title: 'Good Morning!',
+        message: `Good morning, ${user.username}! Ready to start your AI conversations?`,
+        type: 'success',
+        metadata: {
+          source: 'system',
+          priority: 'medium'
+        }
+      });
+
+      io.to(`user:${user._id}`).emit('notification', {
+        id: String(firstMessageNotification._id),
+        message: firstMessageNotification.message,
+        type: firstMessageNotification.type,
+        timestamp: firstMessageNotification.createdAt,
+        read: firstMessageNotification.isRead,
+      });
+    }
+
+    // Emit real-time notification with delay
+    const notificationPayload = {
+      id: String(notification._id),
+      message: notification.message,
+      type: notification.type,
+      timestamp: notification.createdAt,
+      read: notification.isRead,
+    };
+    
+    // Add delay to ensure socket is ready
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    console.log('Sending login notification to user:', user._id, notificationPayload);
+    io.to(`user:${user._id}`).emit('notification', notificationPayload);
+    
+    // Send additional automatic notifications after login
+    setTimeout(async () => {
+      try {
+        // Welcome bonus notification
+        const bonusNotification = await Notification.create({
+          userId: user._id,
+          title: 'Welcome Bonus!',
+          message: 'You\'ve received 50 bonus credits for logging in today!',
+          type: 'success',
+          metadata: {
+            source: 'system',
+            priority: 'medium'
+          }
+        });
+        
+        io.to(`user:${user._id}`).emit('notification', {
+          id: String(bonusNotification._id),
+          message: bonusNotification.message,
+          type: bonusNotification.type,
+          timestamp: bonusNotification.createdAt,
+          read: bonusNotification.isRead,
+        });
+      } catch (error) {
+        console.error('Bonus notification error:', error);
+      }
+    }, 3000);
+
+    // Send automatic global notifications after login
+    setTimeout(async () => {
+      try {
+        // System maintenance notification (global)
+        const systemMaintenancePayload = {
+          title: 'System Maintenance',
+          message: 'Scheduled maintenance will occur tonight from 11 PM to 1 AM EST. Some features may be temporarily unavailable.',
+          type: 'warning',
+          timestamp: new Date().toISOString(),
+          read: false,
+        };
+        
+        console.log('Sending automatic global system maintenance notification');
+        io.emit('notification', systemMaintenancePayload);
+      } catch (error) {
+        console.error('System maintenance notification error:', error);
+      }
+    }, 5000);
+
+    setTimeout(async () => {
+      try {
+        // New feature notification (global)
+        const newFeaturePayload = {
+          title: 'New Feature Available!',
+          message: '🎉 Real-time notifications are now live! You can receive instant updates about your conversations, credits, and system announcements.',
+          type: 'info',
+          timestamp: new Date().toISOString(),
+          read: false,
+        };
+        
+        console.log('Sending automatic global new feature notification');
+        io.emit('notification', newFeaturePayload);
+      } catch (error) {
+        console.error('New feature notification error:', error);
+      }
+    }, 8000);
 
     res.json({
       message: 'Login successful',
@@ -219,4 +346,4 @@ router.get('/me', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = { router, setIO };

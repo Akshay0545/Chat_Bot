@@ -36,7 +36,8 @@ const uiSlice = createSlice({
       }
     },
     addNotification: (state, action) => {
-      state.notifications.push(action.payload);
+      console.log('Adding notification to Redux:', action.payload);
+      state.notifications.unshift(action.payload);
     },
     markNotificationRead: (state, action) => {
       const notification = state.notifications.find(n => n.id === action.payload);

@@ -8,9 +8,9 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
-const authRoutes = require('./routes/auth');
-const chatRoutes = require('./routes/chat');
-const userRoutes = require('./routes/user');
+const { router: authRoutes, setIO: setAuthIO } = require('./routes/auth');
+const { router: chatRoutes, setIO: setChatIO } = require('./routes/chat');
+const { router: userRoutes, setIO } = require('./routes/user');
 const { authenticateToken } = require('./middleware/auth');
 
 const app = express();
@@ -62,6 +62,11 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-chat')
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
+// Set up io instance for routes
+setAuthIO(io);
+setChatIO(io);
+setIO(io);
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', authenticateToken, chatRoutes);
@@ -78,18 +83,29 @@ app.get('/api/health', (req, res) => {
 
 // Socket.io connection handling
 io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
-  if (!token) {
+  try {
+    const token = socket.handshake.auth && socket.handshake.auth.token;
+    if (!token) {
+      return next(new Error('Authentication error'));
+    }
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    socket.userId = decoded.userId;
+    return next();
+  } catch (err) {
     return next(new Error('Authentication error'));
   }
-  
-  // Verify JWT token here (simplified for demo)
-  // In production, use proper JWT verification
-  next();
 });
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+  console.log('User connected:', socket.id, 'userId:', socket.userId);
+  if (socket.userId) {
+    const userRoom = `user:${socket.userId}`;
+    socket.join(userRoom);
+    console.log(`Socket ${socket.id} joined room: ${userRoom}`);
+  } else {
+    console.log('No userId found for socket:', socket.id);
+  }
   
   socket.on('join-conversation', (conversationId) => {
     socket.join(conversationId);
@@ -105,6 +121,15 @@ io.on('connection', (socket) => {
     console.log('User disconnected:', socket.id);
   });
 });
+
+// Helper functions to emit notifications
+function sendGlobalNotification(io, payload) {
+  io.emit('notification', payload);
+}
+
+function sendUserNotification(io, userId, payload) {
+  io.to(`user:${userId}`).emit('notification', payload);
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {

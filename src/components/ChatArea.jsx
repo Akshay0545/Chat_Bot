@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Send, User, Bot, Search, Copy, ThumbsUp, ThumbsDown, MoreHorizontal, Pause } from 'lucide-react';
 import { addMessage, setTyping, addConversation, setActiveConversation } from '../store/chatSlice';
 import { updateCredits } from '../store/authSlice';
-import aiService from '../services/aiService';
 
 const ChatArea = () => {
   const dispatch = useDispatch();
@@ -82,22 +81,30 @@ const ChatArea = () => {
     console.log('Setting typing to true');
     dispatch(setTyping(true));
 
-    // Deduct credits
-    const currentCredits = user?.credits || 1250;
-    dispatch(updateCredits(currentCredits - 1));
+    // Credits will be deducted by the backend API call
 
-    // Get AI response
+    // Get AI response from backend API
     try {
-      const conversationHistory = conversationMessages.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.content
-      }));
+      // Create a cancellable promise for backend API call
+      const apiPromise = fetch(`/api/chat/conversations/${activeConversation || userMessage.conversationId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          content: inputValue
+        })
+      });
+      aiResponseRef.current = apiPromise;
 
-      // Create a cancellable promise for AI response
-      const aiResponsePromise = aiService.generateResponse(inputValue, conversationHistory);
-      aiResponseRef.current = aiResponsePromise;
+      const response = await apiPromise;
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      const aiResponse = await aiResponsePromise;
+      const data = await response.json();
       
       // Check if the response was cancelled
       if (isPaused) {
@@ -107,13 +114,18 @@ const ChatArea = () => {
       
       const aiMessage = {
         id: Date.now() + 1,
-        content: aiResponse,
+        content: data.aiMessage.content,
         sender: 'ai',
         timestamp: new Date().toISOString(),
         conversationId: activeConversation || userMessage.conversationId,
       };
       
       dispatch(addMessage(aiMessage));
+      
+      // Update credits from backend response
+      if (data.credits !== undefined) {
+        dispatch(updateCredits(data.credits));
+      }
     } catch (error) {
       if (isPaused) {
         console.log('AI response was paused');
