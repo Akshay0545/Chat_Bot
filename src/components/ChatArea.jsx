@@ -151,7 +151,7 @@ const ChatArea = () => {
       
       const aiMessage = {
         id: Date.now() + 1,
-        content: data.message.content,
+        content: data.aiMessage.content,
         sender: 'ai',
         timestamp: new Date().toISOString(),
         conversationId: activeConversation || userMessage.conversationId,

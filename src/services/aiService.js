@@ -9,81 +9,8 @@ class AIService {
   }
 
   async generateResponse(message, conversationHistory = []) {
-    try {
-      // If no API key is provided, return a mock response
-      if (!this.apiKey) {
-        return this.getMockResponse(message);
-      }
-
-      // Prepare content for Gemini API
-      const contents = [];
-      
-      // Add conversation history (last 10 messages for context)
-      const recentHistory = conversationHistory.slice(-10);
-      for (const msg of recentHistory) {
-        contents.push({
-          role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.content }]
-        });
-      }
-      
-      // Add current message
-      contents.push({
-        role: 'user',
-        parts: [{ text: message }]
-      });
-
-      const response = await fetch(`${this.apiUrl}?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: contents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1000,
-            topP: 0.8,
-            topK: 10
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            }
-          ]
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Gemini API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-        return data.candidates[0].content.parts[0].text;
-      } else {
-        throw new Error('Invalid response format from Gemini API');
-      }
-
-    } catch (error) {
-      console.error('AI Service Error:', error);
-      return this.getMockResponse(message);
-    }
+    // Always return the same response for any user question
+    return "That's a thoughtful inquiry. Let me break this down for you... This is a mock response to demonstrate the chat functionality. In a real application, this would be connected to an actual AI service.";
   }
 
   getMockResponse(message) {

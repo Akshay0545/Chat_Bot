@@ -99,52 +99,34 @@ npm run backend
 npm run dev
 ```
 
-## 🏗️ Project Structure
 
-```
-ai-chat-app/
-├── src/                          # Frontend source code
-│   ├── components/               # React components
-│   │   ├── AuthProvider.jsx     # Authentication context
-│   │   ├── ChatArea.jsx         # Main chat interface
-│   │   ├── Header.jsx           # Top navigation
-│   │   ├── NotificationPanel.jsx # Notifications
-│   │   ├── ProtectedRoute.jsx   # Route protection
-│   │   └── Sidebar.jsx          # Chat sidebar
-│   ├── pages/                   # Page components
-│   │   ├── Dashboard.jsx        # Main dashboard
-│   │   ├── SignIn.jsx          # Login page
-│   │   └── SignUp.jsx          # Registration page
-│   ├── store/                   # Redux store
-│   │   ├── authSlice.js         # Authentication state
-│   │   ├── chatSlice.js         # Chat state
-│   │   ├── uiSlice.js           # UI state
-│   │   └── store.js             # Store configuration
-│   ├── services/                # API services
-│   │   └── api.js               # API client
-│   ├── App.jsx                  # Main app component
-│   ├── main.jsx                 # App entry point
-│   └── index.css                # Global styles
-├── backend/                     # Backend source code
-│   ├── models/                  # Database models
-│   │   ├── User.js              # User model
-│   │   ├── Conversation.js      # Conversation model
-│   │   ├── Message.js           # Message model
-│   │   └── Notification.js      # Notification model
-│   ├── routes/                  # API routes
-│   │   ├── auth.js              # Authentication routes
-│   │   ├── chat.js              # Chat routes
-│   │   └── user.js              # User routes
-│   ├── middleware/              # Custom middleware
-│   │   ├── auth.js              # Authentication middleware
-│   │   └── validation.js        # Input validation
-│   ├── server.js                # Main server file
-│   └── package.json             # Backend dependencies
-├── package.json                 # Frontend dependencies
-├── vite.config.ts               # Vite configuration
-├── tailwind.config.js           # Tailwind configuration
-└── README.md                    # This file
-```
+
+## 🔔 Notifications & Real-time Updates
+
+### Socket.io Integration
+The application uses Socket.io for real-time communication between frontend and backend.
+
+### When Notifications Are Sent
+
+#### User-Specific Notifications (Targeted)
+- **New Conversation Created**: When a user creates a new conversation
+- **AI Response Ready**: When AI finishes processing a message
+- **Low Credits Warning**: When user has 1248 credits remaining
+- **Urgent Low Credits**: When user has 1245 credits remaining (marked as urgent)
+
+#### Global Notifications (Broadcast)
+-  The infrastructure supports global broadcasts
+
+### Notification Types
+- **info**: General information (new conversation)
+- **success**: Successful operations (AI response ready)
+- **warning**: Warnings (low credits)
+- **error**: Errors (urgent low credits)
+
+### Socket Events
+- `notification`: Real-time notification delivery
+- `new-message`: Message broadcasting in conversations
+- `join-conversation`: User joining conversation rooms
 
 ## 🔌 API Endpoints
 
@@ -255,29 +237,6 @@ curl -X POST http://localhost:5000/api/auth/login \
   -d '{"email":"test@example.com","password":"password123"}'
 ```
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **MongoDB Connection Error**
-   - Ensure MongoDB is running
-   - Check connection string in `.env`
-   - Verify network access
-
-2. **CORS Errors**
-   - Check CORS configuration in `backend/server.js`
-   - Ensure frontend URL is whitelisted
-
-3. **Authentication Issues**
-   - Verify JWT_SECRET is set
-   - Check token expiration
-   - Clear localStorage and try again
-
-4. **Build Errors**
-   - Run `npm run full:install` to install all dependencies
-   - Check Node.js version (v16+ required)
-   - Clear node_modules and reinstall
-
 ## 📝 Development
 
 ### Adding New Features
@@ -295,21 +254,6 @@ curl -X POST http://localhost:5000/api/auth/login \
 ## 📄 License
 
 This project is licensed under the MIT License.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📞 Support
-
-For support or questions:
-- Create an issue in the repository
-- Check the troubleshooting section
-- Review the API documentation
 
 ---
 

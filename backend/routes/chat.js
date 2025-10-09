@@ -448,50 +448,24 @@ async function generateAIResponse(userMessage, settings) {
   try {
     // Simulate API call delay
     const processingTime = Math.random() * 2000 + 500; // 500-2500ms
-    
+
     await new Promise(resolve => setTimeout(resolve, processingTime));
 
-    // Generate contextual response based on message content
-    let contextualResponse = "";
-    const message = userMessage.toLowerCase();
-
-    if (message.includes('python') || message.includes('function') || message.includes('code')) {
-      contextualResponse = `Here's a Python function to sort a list:\n\n\`\`\`python\ndef sort_list(lst):\n    """Sort a list in ascending order"""\n    return sorted(lst)\n\n# Example usage:\nnumbers = [3, 1, 4, 1, 5, 9, 2, 6]\nsorted_numbers = sort_list(numbers)\nprint(sorted_numbers)  # Output: [1, 1, 2, 3, 4, 5, 6, 9]\n\`\`\`\n\nThis function uses Python's built-in \`sorted()\` function which returns a new sorted list without modifying the original.`;
-    } else if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
-      contextualResponse = `Hello! I'm an AI assistant here to help you with your questions. How can I assist you today?`;
-    } else if (message.includes('help') || message.includes('how')) {
-      contextualResponse = `I'd be happy to help! Could you please provide more details about what you'd like assistance with? I can help with programming, general questions, explanations, and much more.`;
-    } else if (message.includes('explain') || message.includes('what is')) {
-      contextualResponse = `I'd be glad to explain that topic for you. Let me break it down in a way that's easy to understand.`;
-    } else if (message.includes('thank')) {
-      contextualResponse = `You're very welcome! I'm here whenever you need assistance. Feel free to ask me anything else.`;
-    } else {
-      // General responses for other messages
-      const generalResponses = [
-        "That's an interesting question! Let me help you with that.",
-        "I understand what you're asking. Here's my perspective on this topic.",
-        "Great question! This is a complex topic that requires careful consideration.",
-        "I'd be happy to help you explore this further. Let me break it down for you.",
-        "That's a thoughtful inquiry. Here's what I think about this subject.",
-        "Thank you for your message! I'm here to help with any questions you might have.",
-        "I appreciate you reaching out. Let me provide you with some insights on this topic.",
-        "That's a great point you've raised. Here's my take on this subject."
-      ];
-      contextualResponse = generalResponses[Math.floor(Math.random() * generalResponses.length)];
-    }
+    // Always return the same response for any user question
+    const content = "That's a thoughtful inquiry. Let me break this down for you... This is a mock response to demonstrate the chat functionality. In a real application, this would be connected to an actual AI service.";
 
     const tokens = Math.floor(Math.random() * 100) + 50; // 50-150 tokens
 
     return {
-      content: `${contextualResponse}\n\n**This is a mock AI response.** In a real application, this would be connected to an actual AI service like OpenAI's GPT or Anthropic's Claude.`,
+      content,
       tokens,
       processingTime: Math.round(processingTime)
     };
   } catch (error) {
     console.error('Error in generateAIResponse:', error);
-    // Guaranteed fallback response
+    // Guaranteed fallback response (same as main response to avoid empty responses)
     return {
-      content: `I apologize for the technical issue. This is a guaranteed fallback response. Your message was: "${userMessage}". This is a mock AI system for demonstration purposes.`,
+      content: "That's a thoughtful inquiry. Let me break this down for you... This is a mock response to demonstrate the chat functionality. In a real application, this would be connected to an actual AI service.",
       tokens: 30,
       processingTime: 1000
     };
