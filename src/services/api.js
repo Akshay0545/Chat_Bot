@@ -1,135 +1,201 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// src/services/api.js
+
+// ---- Base URL resolution ----
+// In prod set: VITE_API_URL=https://chat-bot-4oy4.onrender.com/api
+// (No trailing slash needed; this code handles both cases.)
+const RAW_BASE =
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL || // optional alias if you use it elsewhere
+  'http://localhost:5000/api';
+
+// Normalize base (no trailing slash)
+const API_BASE = RAW_BASE.replace(/\/+$/, '');
+
+// Join base + endpoint safely (single slash)
+function joinUrl(base, endpoint) {
+  if (!endpoint) return base;
+  // If endpoint is already absolute (http/https), use it as-is
+  if (/^https?:\/\//i.test(endpoint)) return endpoint;
+
+  const left = base.replace(/\/+$/, '');
+  const right = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${left}${right}`;
+}
+
+// Attempt to parse JSON; fall back to raw text
+async function parseResponseBody(res) {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
 
 class ApiService {
   constructor() {
-    this.baseURL = API_BASE_URL;
+    this.baseURL = API_BASE;
   }
 
   async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
-    const token = localStorage.getItem('token');
+    const url = joinUrl(this.baseURL, endpoint);
 
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-      },
-      ...options,
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
 
-    try {
-      const response = await fetch(url, config);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Request failed');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+    // Stringify body if it's a plain object and method expects a body
+    let body = options.body;
+    const method = (options.method || 'GET').toUpperCase();
+    const hasJsonBody = body && typeof body === 'object' && !(body instanceof FormData);
+    if (hasJsonBody && method !== 'GET' && method !== 'HEAD') {
+      body = JSON.stringify(body);
     }
+
+    let response;
+    try {
+      response = await fetch(url, {
+        // Keep credentials optional; you’re using Bearer tokens.
+        // If you later switch to httpOnly cookies, set credentials: 'include'.
+        credentials: options.credentials || 'same-origin',
+        ...options,
+        method,
+        headers,
+        body,
+      });
+    } catch (networkErr) {
+      // e.g., CORS blocked, DNS, offline
+      console.error('API network error:', networkErr);
+      throw new Error('Failed to fetch');
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+
+    if (!response.ok) {
+      // Try to extract a meaningful message
+      let errMessage = `HTTP error! status: ${response.status}`;
+      if (isJson) {
+        const data = await parseResponseBody(response);
+        if (data && typeof data === 'object' && (data.message || data.error)) {
+          errMessage = data.message || data.error;
+        }
+      } else {
+        const text = await parseResponseBody(response);
+        if (typeof text === 'string' && text.trim()) errMessage = text;
+      }
+      throw new Error(errMessage);
+    }
+
+    // No-content or plain text responses
+    if (response.status === 204) return null;
+    if (!isJson) return parseResponseBody(response);
+
+    // JSON
+    return parseResponseBody(response);
   }
 
-  // Auth endpoints
-  async register(userData) {
+  // ---------- Auth ----------
+  register(userData) {
     return this.request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify(userData),
+      body: userData,
     });
   }
 
-  async login(credentials) {
+  login(credentials) {
     return this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      body: credentials,
     });
   }
 
-  async refreshToken(refreshToken) {
+  refreshToken(refreshToken) {
     return this.request('/auth/refresh', {
       method: 'POST',
-      body: JSON.stringify({ refreshToken }),
+      body: { refreshToken },
     });
   }
 
-  async getCurrentUser() {
+  getCurrentUser() {
     return this.request('/auth/me');
   }
 
-  // Chat endpoints
-  async getConversations() {
+  // ---------- Chat ----------
+  getConversations() {
     return this.request('/chat/conversations');
   }
 
-  async createConversation(title) {
+  createConversation(title) {
     return this.request('/chat/conversations', {
       method: 'POST',
-      body: JSON.stringify({ title }),
+      body: { title },
     });
   }
 
-  async getMessages(conversationId, page = 1, limit = 50) {
+  getMessages(conversationId, page = 1, limit = 50) {
     return this.request(`/chat/conversations/${conversationId}/messages?page=${page}&limit=${limit}`);
   }
 
-  async sendMessage(conversationId, content) {
+  sendMessage(conversationId, content) {
     return this.request(`/chat/conversations/${conversationId}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ content }),
+      body: { content },
     });
   }
 
-  async deleteConversation(conversationId) {
+  deleteConversation(conversationId) {
     return this.request(`/chat/conversations/${conversationId}`, {
       method: 'DELETE',
     });
   }
 
-  async updateConversation(conversationId, title) {
+  updateConversation(conversationId, title) {
     return this.request(`/chat/conversations/${conversationId}`, {
       method: 'PUT',
-      body: JSON.stringify({ title }),
+      body: { title },
     });
   }
 
-  // User endpoints
-  async getUserProfile() {
+  // ---------- User ----------
+  getUserProfile() {
     return this.request('/user/profile');
   }
 
-  async updateUserProfile(profileData) {
+  updateUserProfile(profileData) {
     return this.request('/user/profile', {
       method: 'PUT',
-      body: JSON.stringify(profileData),
+      body: profileData,
     });
   }
 
-  async getNotifications(page = 1, limit = 20, unreadOnly = false) {
+  getNotifications(page = 1, limit = 20, unreadOnly = false) {
     return this.request(`/user/notifications?page=${page}&limit=${limit}&unreadOnly=${unreadOnly}`);
   }
 
-  async markNotificationRead(notificationId) {
+  markNotificationRead(notificationId) {
     return this.request(`/user/notifications/${notificationId}/read`, {
       method: 'PUT',
     });
   }
 
-  async markAllNotificationsRead() {
+  markAllNotificationsRead() {
     return this.request('/user/notifications/read-all', {
       method: 'PUT',
     });
   }
 
-  async deleteNotification(notificationId) {
+  deleteNotification(notificationId) {
     return this.request(`/user/notifications/${notificationId}`, {
       method: 'DELETE',
     });
   }
 
-  async getUserStats() {
+  getUserStats() {
     return this.request('/user/stats');
   }
 }

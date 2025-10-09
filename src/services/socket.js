@@ -1,89 +1,76 @@
+// src/services/socket.js
 import { io } from 'socket.io-client';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:5000';
-console.log('Socket connecting to:', WS_URL);
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  import.meta.env.VITE_WS_URL || // legacy fallback if you had this
+  'http://localhost:5000';
 
 let socket;
 
 export function getSocket() {
   const token = localStorage.getItem('token');
-  
   if (!token) {
     console.error('No authentication token found for socket connection');
     return null;
   }
-  
-  // Only create new socket if none exists or if disconnected
-  if (!socket || !socket.connected) {
-    // Clean up existing socket if it exists
+
+  if (!socket || socket.disconnected) {
     if (socket) {
-      console.log('Disconnecting existing socket before creating new one');
       socket.disconnect();
       socket.removeAllListeners();
     }
-    
-    socket = io(WS_URL, {
+
+    socket = io(SOCKET_URL, {
+      withCredentials: true,
       transports: ['websocket'],
-      auth: { token },
+      auth: { token },                // server expects handshake.auth.token
       autoConnect: false,
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 500,
       reconnectionDelayMax: 5000,
-      forceNew: true, // Force new connection
+      forceNew: true,
     });
-    
-    // Add connection event listeners for debugging
+
     socket.on('connect', () => {
-      console.log('Socket connected successfully with ID:', socket.id, 'Token user:', token.substring(0, 20) + '...');
+      console.log('Socket connected:', socket.id);
     });
-    
-    socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error.message);
+    socket.on('connect_error', (err) => {
+      console.error('Socket connect_error:', err?.message || err);
     });
-    
     socket.on('disconnect', (reason) => {
       console.log('Socket disconnected:', reason);
     });
-  } else {
-    console.log('Reusing existing socket connection');
   }
-  
+
   return socket;
 }
 
 export function connectSocket() {
   const s = getSocket();
-  if (!s) {
-    console.error('Cannot connect socket: No authentication token');
-    return null;
-  }
-  
+  if (!s) return null;
   if (!s.connected) {
-    console.log('Connecting socket...');
+    console.log('Connecting socket to', SOCKET_URL);
     s.connect();
-  } else {
-    console.log('Socket already connected');
   }
   return s;
 }
 
 export function disconnectSocket() {
   if (socket) {
-    console.log('Disconnecting socket and cleaning up...');
     socket.disconnect();
     socket.removeAllListeners();
     socket = null;
   }
 }
 
-export function refreshAuthToken(token) {
+export function refreshAuthToken(nextToken) {
   const s = getSocket();
-  s.auth = { token };
+  if (!s) return;
+  s.auth = { token: nextToken };
   if (s.connected) {
     s.disconnect();
     s.connect();
   }
 }
-
-
