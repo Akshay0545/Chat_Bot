@@ -7,5 +7,8 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "VITE_WS_URL": "https://chat-bot-4oy4.onrender.com"
+  }
 }

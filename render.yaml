@@ -11,3 +11,5 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18
+      - key: VITE_WS_URL
+        value: https://chat-bot-4oy4.onrender.com

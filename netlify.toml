@@ -2,6 +2,9 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  VITE_WS_URL = "hhttps://chat-bot-4oy4.onrender.com"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

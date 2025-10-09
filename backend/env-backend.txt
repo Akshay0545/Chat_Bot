@@ -12,4 +12,4 @@ JWT_EXPIRE=1h
 JWT_REFRESH_EXPIRE=7d
 
 # CORS Configuration
-FRONTEND_URL=http://localhost:3001
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001
